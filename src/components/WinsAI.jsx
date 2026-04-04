@@ -160,6 +160,7 @@ export default function WinsAI() {
   const [thinking, setThinking] = useState(false)
   const [msgIdx, setMsgIdx] = useState(0)
   const [messages, setMessages] = useState([])
+  const [fabHovered, setFabHovered] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -253,11 +254,17 @@ export default function WinsAI() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 24 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-black shadow-2xl"
+            onMouseEnter={() => setFabHovered(true)}
+            onMouseLeave={() => setFabHovered(false)}
+            className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-2xl text-sm font-black shadow-2xl overflow-hidden"
             style={{
               background: accent,
               color: fg,
               boxShadow: `${accentGlow(isDark, 'lg')}, 0 4px 24px rgba(0,0,0,0.4)`,
+              width: fabHovered ? 'auto' : '48px',
+              height: '48px',
+              padding: fabHovered ? '0 16px' : '0',
+              transition: 'width 0.25s ease, padding 0.25s ease',
             }}
             aria-label={t.ai.open}
           >
@@ -267,7 +274,15 @@ export default function WinsAI() {
                 style={{ background: accentAlpha(isDark, 0.4) }} />
               <Zap size={16} strokeWidth={3} className="relative" />
             </span>
-            {t.ai.title}
+            {fabHovered && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                className="ml-2.5 whitespace-nowrap"
+              >
+                {t.ai.title}
+              </motion.span>
+            )}
           </motion.button>
         )}
       </AnimatePresence>

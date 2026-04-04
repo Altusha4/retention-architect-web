@@ -12,6 +12,7 @@ import {
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { fetchStats, fetchPredict } from '../services/api'
+import { exportTaskPdf } from '../lib/exportTaskPdf'
 import { clsx } from 'clsx'
 
 // ─── helpers ──────────────────────────────────
@@ -155,7 +156,7 @@ function CustomBar(props) {
 }
 
 // ─── main component ────────────────────────────
-export default function Overview() {
+export default function Overview({ onNavigate }) {
   const { t } = useI18n()
   const { isDark } = useTheme()
 
@@ -181,10 +182,14 @@ export default function Overview() {
   const markDone = (id) => setTasks(ts => ts.map(tk => tk.id === id ? { ...tk, done: !tk.done } : tk))
   const exportPdf = useCallback(async (id) => {
     setTasks(ts => ts.map(tk => tk.id === id ? { ...tk, exporting: true } : tk))
-    await new Promise(r => setTimeout(r, 1400))
+    try {
+      await exportTaskPdf(id, t)
+    } catch (err) {
+      console.error('PDF export failed:', err)
+    }
     setTasks(ts => ts.map(tk => tk.id === id ? { ...tk, exporting: false, exported: true } : tk))
     setTimeout(() => setTasks(ts => ts.map(tk => tk.id === id ? { ...tk, exported: false } : tk)), 2800)
-  }, [])
+  }, [t])
 
   // Deep Scan state
   const [query, setQuery] = useState('')
@@ -506,7 +511,10 @@ export default function Overview() {
                         : <FileDown size={12} />}
                       {isExported ? t.tasks.exported : isExporting ? t.tasks.exporting : t.tasks.exportPdf}
                     </button>
-                    <button className={clsx('text-xs font-semibold flex items-center gap-1 px-2 py-2', isDark ? 'text-white/30 hover:text-white' : 'text-black/30 hover:text-black')}>
+                    <button
+                      onClick={() => onNavigate?.('taskDetail', task.key)}
+                      className={clsx('text-xs font-semibold flex items-center gap-1 px-2 py-2', isDark ? 'text-white/30 hover:text-white' : 'text-black/30 hover:text-black')}
+                    >
                       {t.tasks.viewDetails} <ArrowRight size={11} />
                     </button>
                   </div>
