@@ -4,6 +4,7 @@ import {
   Search, AlertTriangle, CheckCircle, XCircle,
   Zap, Clock, CreditCard, Activity, Shield,
 } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 
 const mockUsers = {
   'USR-001': {
@@ -49,6 +50,7 @@ const sevCfg = {
 }
 
 export default function DeepScan() {
+  const { t } = useI18n()
   const [query, setQuery]   = useState('')
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -60,7 +62,7 @@ export default function DeepScan() {
     await new Promise(r => setTimeout(r, 800))
     const found = mockUsers[query.trim().toUpperCase()]
     if (found) setResult(found)
-    else setError(`No user found for ID "${query}". Try USR-001, USR-002, or USR-003.`)
+    else setError(t.deepScan.notFound + ' "' + query + '". ' + t.deepScan.tryIds)
     setLoading(false)
   }
 
@@ -69,9 +71,9 @@ export default function DeepScan() {
 
       {/* Header */}
       <div>
-        <h2 className="text-2xl sm:text-3xl font-black text-white">Deep Scan</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-white">{t.deepScan.title}</h2>
         <p className="text-white/35 mt-1 text-xs md:text-sm">
-          Instant AI risk analysis on any subscriber ID
+          {t.deepScan.sub}
         </p>
       </div>
 
@@ -85,7 +87,7 @@ export default function DeepScan() {
           className="block text-[0.62rem] font-bold tracking-[0.2em] uppercase mb-3"
           style={{ color: '#ccff00' }}
         >
-          User ID / Subscriber Identifier
+          {t.deepScan.label}
         </label>
 
         {/* Input + button — stacked on mobile, inline on sm+ */}
@@ -100,7 +102,7 @@ export default function DeepScan() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleScan()}
-              placeholder="e.g. USR-001"
+              placeholder={t.deepScan.placeholder}
               className="w-full pl-11 pr-4 py-3.5 rounded-xl text-white placeholder-white/20 text-sm font-mono outline-none transition-all duration-200"
               style={{
                 background: '#050505',
@@ -129,19 +131,19 @@ export default function DeepScan() {
                   transition={{ repeat: Infinity, duration: 0.75, ease: 'linear' }}
                   className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full"
                 />
-                Scanning…
+                {t.deepScan.scanning}
               </>
             ) : (
               <>
                 <Zap size={15} strokeWidth={3} />
-                Run Analysis
+                {t.deepScan.runAnalysis}
               </>
             )}
           </motion.button>
         </div>
 
         <p className="text-[0.62rem] text-white/25 mt-3">
-          Try:{' '}
+          {t.deepScan.tryLabel}{' '}
           {['USR-001', 'USR-002', 'USR-003'].map((id, i) => (
             <span key={id}>
               <button
@@ -202,7 +204,7 @@ export default function DeepScan() {
                       {result.plan}
                     </span>
                     <span className="text-[0.62rem] text-white/30">
-                      Last active: {result.lastActive}
+                      {t.deepScan.lastActive}: {result.lastActive}
                     </span>
                   </div>
                 </div>
@@ -224,7 +226,7 @@ export default function DeepScan() {
                   >
                     {result.riskLevel}
                   </div>
-                  <div className="text-[0.6rem] text-white/30 mt-0.5">{result.churnType} risk</div>
+                  <div className="text-[0.6rem] text-white/30 mt-0.5">{result.churnType} {t.deepScan.risk}</div>
                 </div>
               </div>
 
@@ -249,7 +251,7 @@ export default function DeepScan() {
               style={{ background: 'rgba(6,6,6,0.97)' }}
             >
               <p className="text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/25 mb-3">
-                Risk Explainability Factors
+                {t.deepScan.riskFactors}
               </p>
               {result.factors.map((factor, i) => {
                 const Icon = factor.icon
@@ -297,7 +299,7 @@ export default function DeepScan() {
                     className="text-[0.6rem] font-bold tracking-widest uppercase"
                     style={{ color: '#ccff00' }}
                   >
-                    AI Recommendation
+                    {t.deepScan.aiRecommendation}
                   </span>
                 </div>
                 <p className="text-sm text-white/60 leading-relaxed">{result.recommendation}</p>

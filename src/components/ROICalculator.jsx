@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { DollarSign, TrendingUp, AlertTriangle, Zap } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -90,6 +91,7 @@ function ChartTooltip({ active, payload }) {
 
 // ── Main component ─────────────────────────────
 export default function ROICalculator() {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const accent = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
@@ -140,18 +142,18 @@ export default function ROICalculator() {
   const fmtN = v => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(v)
 
   const chartData = [
-    { name: 'Revenue at Risk',  value: calc.revenueAtRisk, fill: '#ff0055' },
-    { name: 'Recovered',        value: calc.recovered,     fill: accent },
-    { name: 'Lost to Churn',    value: calc.lost,          fill: '#ff8800' },
+    { name: t.roi.revenueAtRiskChart,  value: calc.revenueAtRisk, fill: '#ff0055' },
+    { name: t.roi.recoveredChart,       value: calc.recovered,     fill: accent },
+    { name: t.roi.lostToChurn,          value: calc.lost,          fill: '#ff8800' },
   ]
 
   return (
     <motion.div {...fadeUp(0)}>
       {/* Header */}
       <div className="mb-5">
-        <h2 className={clsx('text-xl font-black', textMain)}>Cost-Sensitive ROI Calculator</h2>
+        <h2 className={clsx('text-xl font-black', textMain)}>{t.roi.title}</h2>
         <p className={clsx('text-xs mt-0.5', textMuted)}>
-          TotalCost = FP × C<sub>FP</sub> + FN × C<sub>FN</sub> · Framework: El Attar & El-Hajj (Frontiers in AI, 2026)
+          {t.roi.formula}
         </p>
       </div>
 
@@ -162,25 +164,25 @@ export default function ROICalculator() {
             background: isDark ? 'rgba(10,10,10,0.82)' : 'rgba(255,255,255,0.82)',
             border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.07)',
           }}>
-          <p className={clsx('text-[0.6rem] font-bold tracking-widest uppercase mb-1', textMuted)}>Input Parameters</p>
+          <p className={clsx('text-[0.6rem] font-bold tracking-widest uppercase mb-1', textMuted)}>{t.roi.inputParams}</p>
 
-          <SliderRow label="Total Users" value={totalUsers} min={10000} max={100000} step={1000}
+          <SliderRow label={t.roi.totalUsers} value={totalUsers} min={10000} max={100000} step={1000}
             format={v => fmtN(v)} onChange={setTotalUsers} color={accent} isDark={isDark} />
-          <SliderRow label="Churn Rate" value={churnRate} min={5} max={40}
+          <SliderRow label={t.roi.churnRate} value={churnRate} min={5} max={40}
             format={v => `${v}%`} onChange={setChurnRate} color="#ff8800" isDark={isDark} />
-          <SliderRow label="Avg Revenue Per User (monthly)" value={arpu} min={5} max={50}
+          <SliderRow label={t.roi.avgRevenue} value={arpu} min={5} max={50}
             format={v => `$${v}`} onChange={setArpu} color="#00e5ff" isDark={isDark} />
-          <SliderRow label="Cost Ratio FN:FP" value={costRatio} min={2} max={10}
+          <SliderRow label={t.roi.costRatio} value={costRatio} min={2} max={10}
             format={v => `${v}:1`} onChange={setCostRatio} color="#ff0055" isDark={isDark} />
-          <SliderRow label="Model Recall" value={recall} min={50} max={99}
+          <SliderRow label={t.roi.modelRecall} value={recall} min={50} max={99}
             format={v => `${v}%`} onChange={setRecall} color={accent} isDark={isDark} />
-          <SliderRow label="Model Precision" value={precision} min={50} max={99}
+          <SliderRow label={t.roi.modelPrecision} value={precision} min={50} max={99}
             format={v => `${v}%`} onChange={setPrecision} color={accent} isDark={isDark} />
 
           {/* F1 display */}
           <div className="flex items-center justify-between pt-2 border-t"
             style={{ borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
-            <span className={clsx('text-xs', textMuted)}>Computed F1 Score</span>
+            <span className={clsx('text-xs', textMuted)}>{t.roi.computedF1}</span>
             <span className="text-base font-black" style={{ color: accent }}>{calc.f1.toFixed(3)}</span>
           </div>
         </div>
@@ -189,10 +191,10 @@ export default function ROICalculator() {
         <div className="space-y-4">
           {/* Key metrics */}
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard label="Revenue at Risk"  value={fmt(calc.revenueAtRisk)} sub={`${fmtN(calc.churningUsers)} churning users`} color="#ff0055" icon={AlertTriangle} isDark={isDark} />
-            <MetricCard label="Net Savings"      value={fmt(calc.netSavings)}    sub="At 38% recovery rate"   color={accent}    icon={TrendingUp}   isDark={isDark} />
-            <MetricCard label="False Alarm Cost" value={fmt(calc.costFalseAlarms)} sub={`${fmtN(calc.falseAlarms)} FP interventions`} color="#ff8800" icon={DollarSign} isDark={isDark} />
-            <MetricCard label="ROI"              value={`${calc.roi.toFixed(1)}×`}  sub="Net savings / FP cost" color="#00e5ff"  icon={Zap}          isDark={isDark} />
+            <MetricCard label={t.roi.revenueAtRisk}  value={fmt(calc.revenueAtRisk)} sub={`${fmtN(calc.churningUsers)} ${t.roi.churningUsers}`} color="#ff0055" icon={AlertTriangle} isDark={isDark} />
+            <MetricCard label={t.roi.netSavings}      value={fmt(calc.netSavings)}    sub={t.roi.recoveryRate}   color={accent}    icon={TrendingUp}   isDark={isDark} />
+            <MetricCard label={t.roi.falseAlarmCost} value={fmt(calc.costFalseAlarms)} sub={`${fmtN(calc.falseAlarms)} ${t.roi.fpInterventions}`} color="#ff8800" icon={DollarSign} isDark={isDark} />
+            <MetricCard label={t.roi.roiLabel}              value={`${calc.roi.toFixed(1)}×`}  sub={t.roi.netSavingsFpCost} color="#00e5ff"  icon={Zap}          isDark={isDark} />
           </div>
 
           {/* Bar chart */}
@@ -201,7 +203,7 @@ export default function ROICalculator() {
               background: isDark ? 'rgba(10,10,10,0.82)' : 'rgba(255,255,255,0.82)',
               border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.07)',
             }}>
-            <p className={clsx('text-[0.6rem] font-bold tracking-widest uppercase mb-3', textMuted)}>Revenue Breakdown</p>
+            <p className={clsx('text-[0.6rem] font-bold tracking-widest uppercase mb-3', textMuted)}>{t.roi.revenueBreakdown}</p>
             <ResponsiveContainer width="100%" height={140}>
               <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={gridColor} />
@@ -220,8 +222,7 @@ export default function ROICalculator() {
 
           {/* Source */}
           <p className={clsx('text-[0.52rem] italic', textMuted)}>
-            Cost framework: El Attar & El-Hajj, Frontiers in AI (2026) — doi:10.3389/frai.2026.1748799.
-            Recovery rate 38% based on SaaS industry benchmark (Focus Digital, 2025).
+            {t.roi.roiSource}
           </p>
         </div>
       </div>

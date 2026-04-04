@@ -1,53 +1,56 @@
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, Users } from 'lucide-react'
-
-const stats = [
-  {
-    label: 'RECOVERABLE ASSETS',
-    value: '22,500',
-    color: '#ccff00',
-    glow: 'rgba(204,255,0,0.85)',
-    glowSoft: 'rgba(204,255,0,0.18)',
-    borderColor: 'rgba(204,255,0,0.15)',
-    icon: TrendingUp,
-    trend: '+12.4%',
-    trendUp: true,
-    description: 'Users at risk — recoverable via targeted intervention',
-  },
-  {
-    label: 'TOTAL ECOSYSTEM',
-    value: '90,000',
-    color: '#ffffff',
-    glow: 'rgba(255,255,255,0.6)',
-    glowSoft: 'rgba(255,255,255,0.08)',
-    borderColor: 'rgba(255,255,255,0.08)',
-    icon: Users,
-    trend: '+8.1%',
-    trendUp: true,
-    description: 'Active subscribers across all product tiers',
-  },
-  {
-    label: 'VOLUNTARY CHURN',
-    value: '22,500',
-    color: '#ff0055',
-    glow: 'rgba(255,0,85,0.85)',
-    glowSoft: 'rgba(255,0,85,0.18)',
-    borderColor: 'rgba(255,0,85,0.15)',
-    icon: TrendingDown,
-    trend: '-3.2%',
-    trendUp: false,
-    description: 'Intentional cancellations requiring outreach programs',
-  },
-]
+import { useI18n } from '../context/I18nContext'
 
 export default function HeroStats() {
+  const { t } = useI18n()
+
+  const stats = [
+    {
+      label: t.heroStats.recoverableAssets,
+      value: '22,500',
+      color: '#ccff00',
+      glow: 'rgba(204,255,0,0.85)',
+      glowSoft: 'rgba(204,255,0,0.18)',
+      borderColor: 'rgba(204,255,0,0.15)',
+      icon: TrendingUp,
+      trend: '+12.4%',
+      trendUp: true,
+      description: t.heroStats.recoverableDesc,
+    },
+    {
+      label: t.heroStats.totalEcosystem,
+      value: '90,000',
+      color: '#ffffff',
+      glow: 'rgba(255,255,255,0.6)',
+      glowSoft: 'rgba(255,255,255,0.08)',
+      borderColor: 'rgba(255,255,255,0.08)',
+      icon: Users,
+      trend: '+8.1%',
+      trendUp: true,
+      description: t.heroStats.ecosystemDesc,
+    },
+    {
+      label: t.heroStats.voluntaryChurn,
+      value: '22,500',
+      color: '#ff0055',
+      glow: 'rgba(255,0,85,0.85)',
+      glowSoft: 'rgba(255,0,85,0.18)',
+      borderColor: 'rgba(255,0,85,0.15)',
+      icon: TrendingDown,
+      trend: '-3.2%',
+      trendUp: false,
+      description: t.heroStats.voluntaryDesc,
+    },
+  ]
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mb-6 md:mb-8">
       {stats.map((stat, i) => {
         const Icon = stat.icon
         return (
           <motion.div
-            key={stat.label}
+            key={i}
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1, duration: 0.45, ease: 'easeOut' }}
@@ -105,7 +108,7 @@ export default function HeroStats() {
               >
                 {stat.trend}
               </span>
-              <span className="text-[0.65rem] text-white/30">vs last period</span>
+              <span className="text-[0.65rem] text-white/30">{t.heroStats.vsLastPeriod}</span>
             </div>
 
             {/* Description */}

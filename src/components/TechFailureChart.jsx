@@ -6,18 +6,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-
-const data = [
-  { name: 'Payment Failed', value: 8200, color: '#ccff00' },
-  { name: 'Session Timeout', value: 4100, color: '#00ccff' },
-  { name: 'API Error', value: 3300, color: '#ff8800' },
-  { name: 'Auth Failure', value: 2400, color: '#ff0055' },
-  { name: 'Network Drop', value: 1500, color: '#8800ff' },
-]
-
-const total = data.reduce((sum, d) => sum + d.value, 0)
+import { useI18n } from '../context/I18nContext'
 
 const CustomTooltip = ({ active, payload }) => {
+  const { t } = useI18n()
   if (active && payload && payload.length) {
     const entry = payload[0].payload
     return (
@@ -34,7 +26,7 @@ const CustomTooltip = ({ active, payload }) => {
           {entry.value.toLocaleString()}
         </p>
         <p className="text-xs text-gray-500 mt-1">
-          {((entry.value / total) * 100).toFixed(1)}% of technical failures
+          {((entry.value / entry.total) * 100).toFixed(1)}{t.techFailure.ofTechFailures}
         </p>
       </div>
     )
@@ -43,6 +35,21 @@ const CustomTooltip = ({ active, payload }) => {
 }
 
 export default function TechFailureChart() {
+  const { t } = useI18n()
+
+  const data = [
+    { name: t.techFailure.paymentFailed, value: 8200, color: '#ccff00' },
+    { name: t.techFailure.sessionTimeout, value: 4100, color: '#00ccff' },
+    { name: t.techFailure.apiError, value: 3300, color: '#ff8800' },
+    { name: t.techFailure.authFailure, value: 2400, color: '#ff0055' },
+    { name: t.techFailure.networkDrop, value: 1500, color: '#8800ff' },
+  ]
+
+  const total = data.reduce((sum, d) => sum + d.value, 0)
+
+  // Attach total to each entry so the tooltip can compute percentages
+  const dataWithTotal = data.map(d => ({ ...d, total }))
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,8 +59,8 @@ export default function TechFailureChart() {
       style={{ boxShadow: '0 0 40px rgba(255,0,85,0.04)' }}
     >
       <div className="mb-4 md:mb-6">
-        <h3 className="text-base md:text-lg font-bold text-white">Technical Failure Breakdown</h3>
-        <p className="text-[0.65rem] text-white/30 mt-0.5">Involuntary churn causes — automated recovery eligible</p>
+        <h3 className="text-base md:text-lg font-bold text-white">{t.techFailure.title}</h3>
+        <p className="text-[0.65rem] text-white/30 mt-0.5">{t.techFailure.sub}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
@@ -61,7 +68,7 @@ export default function TechFailureChart() {
           <ResponsiveContainer width={220} height={220}>
             <PieChart>
               <defs>
-                {data.map((entry) => (
+                {dataWithTotal.map((entry) => (
                   <filter key={entry.name} id={`glow-pie-${entry.name.replace(/\s/g, '')}`}>
                     <feGaussianBlur stdDeviation="3" result="coloredBlur" />
                     <feMerge>
@@ -72,7 +79,7 @@ export default function TechFailureChart() {
                 ))}
               </defs>
               <Pie
-                data={data}
+                data={dataWithTotal}
                 cx="50%"
                 cy="50%"
                 innerRadius={62}
@@ -81,7 +88,7 @@ export default function TechFailureChart() {
                 dataKey="value"
                 strokeWidth={0}
               >
-                {data.map((entry, index) => (
+                {dataWithTotal.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={entry.color}
@@ -96,14 +103,14 @@ export default function TechFailureChart() {
           {/* Center label */}
           <div className="relative" style={{ marginTop: '-125px', textAlign: 'center', pointerEvents: 'none' }}>
             <p className="text-2xl font-black text-white">{total.toLocaleString()}</p>
-            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-xs text-gray-500">{t.techFailure.total}</p>
           </div>
           <div style={{ height: '105px' }} />
         </div>
 
         {/* Legend */}
         <div className="flex-1 space-y-3">
-          {data.map((entry) => (
+          {dataWithTotal.map((entry) => (
             <div key={entry.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full flex-shrink-0"

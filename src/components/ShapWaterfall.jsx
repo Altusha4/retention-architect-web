@@ -10,6 +10,7 @@ import {
   Tooltip as ReTooltip, ReferenceLine, Cell, ResponsiveContainer,
 } from 'recharts'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -45,6 +46,7 @@ function Skeleton({ isDark }) {
 // ── Tooltip ─────────────────────────────────────
 function ShapTooltip({ active, payload }) {
   const { isDark } = useTheme()
+  const { t } = useI18n()
   if (!active || !payload?.length) return null
   const d = payload[0]?.payload
   const isPos = d?.contribution >= 0
@@ -59,16 +61,16 @@ function ShapTooltip({ active, payload }) {
       <p className="font-bold mb-1.5" style={{ color }}>{d?.name}</p>
       <div className="space-y-0.5">
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          Feature value: <span className="font-bold" style={{ color }}>{d?.value}</span>
+          {t.shap.featureValue}: <span className="font-bold" style={{ color }}>{d?.value}</span>
         </p>
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          SHAP contribution:{' '}
+          {t.shap.shapContribution}:{' '}
           <span className="font-bold" style={{ color }}>
             {(d?.contribution ?? 0) >= 0 ? '+' : ''}{(d?.contribution ?? 0).toFixed(3)}
           </span>
         </p>
         <p className="text-[0.55rem] opacity-50 mt-1">
-          {isPos ? '▲ increases churn risk' : '▼ reduces churn risk'}
+          {isPos ? t.shap.increasesTooltip : t.shap.reducesTooltip}
         </p>
       </div>
     </div>
@@ -107,6 +109,7 @@ export default function ShapWaterfall({
   userId      = null,
 }) {
   const { isDark } = useTheme()
+  const { t } = useI18n()
   const accent    = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'
@@ -145,20 +148,20 @@ export default function ShapWaterfall({
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
-          <h3 className={clsx('text-sm font-black', textMain)}>SHAP Feature Contributions</h3>
+          <h3 className={clsx('text-sm font-black', textMain)}>{t.shap.title}</h3>
           <p className={clsx('text-[0.6rem] mt-0.5', textMuted)}>
             {userId != null ? `User #${userId} · ` : ''}
-            Base: {src.baseValue.toFixed(3)} → Prediction: {src.outputValue.toFixed(3)}
+            {t.shap.base}: {src.baseValue.toFixed(3)} → {t.shap.prediction}: {src.outputValue.toFixed(3)}
           </p>
         </div>
         <div className="flex items-center gap-3 text-[0.58rem]">
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-3 h-2 rounded-sm" style={{ background: '#ff0055' }} />
-            <span className={textMuted}>Increases churn risk</span>
+            <span className={textMuted}>{t.shap.increasesRisk}</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-3 h-2 rounded-sm" style={{ background: accent }} />
-            <span className={textMuted}>Reduces churn risk</span>
+            <span className={textMuted}>{t.shap.reducesRisk}</span>
           </span>
         </div>
       </div>
@@ -229,17 +232,17 @@ export default function ShapWaterfall({
                 background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
                 border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.07)',
               }}>
-              <span className={textMuted}>Base value</span>
+              <span className={textMuted}>{t.shap.baseValue}</span>
               <span className="font-black" style={{ color: '#00e5ff' }}>{src.baseValue.toFixed(3)}</span>
             </div>
             <span className="text-[0.6rem]" style={{ color: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)' }}>→</span>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-[0.62rem]"
               style={{ background: 'rgba(255,0,85,0.06)', border: '1px solid rgba(255,0,85,0.2)' }}>
-              <span className={textMuted}>Model output</span>
+              <span className={textMuted}>{t.shap.modelOutput}</span>
               <span className="font-black" style={{ color: '#ff0055' }}>{src.outputValue.toFixed(3)}</span>
             </div>
             <p className={clsx('text-[0.55rem] ml-auto italic', textMuted)}>
-              SHAP TreeExplainer · XGBoost ensemble
+              {t.shap.source}
             </p>
           </div>
         </>

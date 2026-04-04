@@ -72,14 +72,14 @@ const sevCfg = {
   healthy:  { color: '#ccff00', bg: 'rgba(204,255,0,0.08)', border: 'rgba(204,255,0,0.22)'  },
 }
 
-const PIE_DATA = [
-  { name: 'Payment Failed', value: 8200, color: '#ccff00' },
-  { name: 'Session Timeout', value: 4100, color: '#00ccff' },
-  { name: 'API Error',       value: 3300, color: '#ff8800' },
-  { name: 'Auth Failure',    value: 2400, color: '#ff0055' },
-  { name: 'Network Drop',    value: 1500, color: '#8800ff' },
+const PIE_RAW = [
+  { key: 'paymentFailed',  value: 8200, color: '#ccff00' },
+  { key: 'sessionTimeout', value: 4100, color: '#00ccff' },
+  { key: 'apiError',       value: 3300, color: '#ff8800' },
+  { key: 'authFailure',    value: 2400, color: '#ff0055' },
+  { key: 'networkDrop',    value: 1500, color: '#8800ff' },
 ]
-const PIE_TOTAL = PIE_DATA.reduce((s, d) => s + d.value, 0)
+const PIE_TOTAL = PIE_RAW.reduce((s, d) => s + d.value, 0)
 
 // ─── sub-components ────────────────────────────
 function Card({ children, className = '', glowColor, style = {} }) {
@@ -103,6 +103,7 @@ function Card({ children, className = '', glowColor, style = {} }) {
 
 function BarTooltip({ active, payload, label }) {
   const { isDark } = useTheme()
+  const { t } = useI18n()
   if (!active || !payload?.length) return null
   const color = payload[0].payload.color
   return (
@@ -112,7 +113,7 @@ function BarTooltip({ active, payload, label }) {
       <p className="text-lg font-black" style={{ color }}>
         {payload[0].value}
         <span className={clsx('text-xs font-normal ml-1', isDark ? 'text-white/40' : 'text-black/40')}>
-          risk score
+          {t.common.riskScore}
         </span>
       </p>
     </div>
@@ -121,6 +122,7 @@ function BarTooltip({ active, payload, label }) {
 
 function PieTooltip({ active, payload }) {
   const { isDark } = useTheme()
+  const { t } = useI18n()
   if (!active || !payload?.length) return null
   const e = payload[0].payload
   return (
@@ -129,7 +131,7 @@ function PieTooltip({ active, payload }) {
       <p className="text-xs font-bold tracking-widest uppercase" style={{ color: e.color }}>{e.name}</p>
       <p className={clsx('text-xl font-black', isDark ? 'text-white' : 'text-black')}>{e.value.toLocaleString()}</p>
       <p className={clsx('text-xs', isDark ? 'text-white/30' : 'text-black/40')}>
-        {((e.value / PIE_TOTAL) * 100).toFixed(1)}% of failures
+        {((e.value / PIE_TOTAL) * 100).toFixed(1)}% {t.common.ofFailuresShort}
       </p>
     </div>
   )
@@ -156,6 +158,8 @@ function CustomBar(props) {
 export default function Overview() {
   const { t } = useI18n()
   const { isDark } = useTheme()
+
+  const PIE_DATA = PIE_RAW.map(d => ({ ...d, name: t.techFailure[d.key] || d.key }))
 
   // Live stats from backend (with fallback to hardcoded values)
   const [stats, setStats] = useState({
@@ -200,10 +204,10 @@ export default function Overview() {
   function sendAction(type) {
     if (type === 'outreach') {
       setOutreachSent(true)
-      setActionToast({ show: true, msg: 'Outreach sequence triggered successfully.' })
+      setActionToast({ show: true, msg: t.common.outreachTriggered })
     } else {
       setDiscountSent(true)
-      setActionToast({ show: true, msg: 'Discount offer dispatched to subscriber.' })
+      setActionToast({ show: true, msg: t.common.discountDispatched })
     }
     setTimeout(() => setActionToast(t => ({ ...t, show: false })), 3000)
   }
@@ -366,7 +370,7 @@ export default function Overview() {
               }}>
               {stats.total_churned_users.toLocaleString()}
             </div>
-            <p className={clsx('text-[0.62rem]', textMuted)}>this period</p>
+            <p className={clsx('text-[0.62rem]', textMuted)}>{t.common.thisPeriod}</p>
           </Card>
         </motion.div>
 
@@ -402,7 +406,7 @@ export default function Overview() {
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-bold"
                 style={{ background: 'rgba(204,255,0,0.1)', border: '1px solid rgba(204,255,0,0.25)', color: '#ccff00' }}>
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#ccff00' }} />
-                {tasks.filter(t => !t.done).length} pending
+                {tasks.filter(tk => !tk.done).length} {t.common.pending}
               </div>
             </div>
           </div>
@@ -569,7 +573,7 @@ export default function Overview() {
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                   <span className={clsx('text-xl font-black', textMain)}>{PIE_TOTAL.toLocaleString()}</span>
-                  <span className={clsx('text-[0.6rem]', textMuted)}>Total</span>
+                  <span className={clsx('text-[0.6rem]', textMuted)}>{t.common.total}</span>
                 </div>
               </div>
               <div className="w-full space-y-2">
@@ -784,7 +788,7 @@ export default function Overview() {
                         : { border: '1px solid rgba(204,255,0,0.3)', color: '#ccff00', background: 'rgba(204,255,0,0.06)' }
                       }
                     >
-                      {outreachSent ? <><Check size={11} strokeWidth={3} /> Action Sent</> : <><ArrowRight size={11} strokeWidth={2.5} /> Send Outreach</>}
+                      {outreachSent ? <><Check size={11} strokeWidth={3} /> {t.common.actionSent}</> : <><ArrowRight size={11} strokeWidth={2.5} /> {t.common.sendOutreach}</>}
                     </motion.button>
                     <motion.button
                       whileTap={{ scale: 0.96 }}
@@ -795,7 +799,7 @@ export default function Overview() {
                         : { border: '1px solid rgba(0,229,255,0.3)', color: '#00e5ff', background: 'rgba(0,229,255,0.06)' }
                       }
                     >
-                      {discountSent ? <><Check size={11} strokeWidth={3} /> Action Sent</> : <><Zap size={11} strokeWidth={2.5} /> Offer Discount</>}
+                      {discountSent ? <><Check size={11} strokeWidth={3} /> {t.common.actionSent}</> : <><Zap size={11} strokeWidth={2.5} /> {t.common.offerDiscount}</>}
                     </motion.button>
                   </div>
                 </div>

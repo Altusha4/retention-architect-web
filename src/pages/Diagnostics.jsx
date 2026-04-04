@@ -23,12 +23,12 @@ const CLUSTER_COLORS = {
 }
 
 // ─── anomaly feed — ML feature-aware signals ──
-const ANOMALIES = [
-  { id:'A-001', msg:'User #0 — gen_failed rate 5.58% (threshold: 3%) · Involuntary churn imminent', severity:'critical', color:'#ff0055', ts:'2m ago' },
-  { id:'A-002', msg:'User #3 — gen_completed 8.49% · Frustration index 0.72 · Critical voluntary churn risk', severity:'critical', color:'#ff0055', ts:'7m ago' },
-  { id:'A-003', msg:'User #5 — gen_total dropped to 67 (avg: 198) · Sharp generation decline detected', severity:'high',    color:'#ff8800', ts:'19m ago' },
-  { id:'A-004', msg:'User #4 — gen_completed 18.83% · At-risk cohort engagement dropping', severity:'warning',  color:'#ffcc00', ts:'31m ago' },
-  { id:'A-005', msg:'Model drift on frustration feature — retraining queued (User #1 outlier: 13.49)', severity:'info',    color:'#00e5ff', ts:'1h ago' },
+const ANOMALIES_RAW = [
+  { id:'A-001', msgKey:'anomaly1', severity:'critical', color:'#ff0055', tsNum:'2',  tsUnit:'m' },
+  { id:'A-002', msgKey:'anomaly2', severity:'critical', color:'#ff0055', tsNum:'7',  tsUnit:'m' },
+  { id:'A-003', msgKey:'anomaly3', severity:'high',     color:'#ff8800', tsNum:'19', tsUnit:'m' },
+  { id:'A-004', msgKey:'anomaly4', severity:'warning',  color:'#ffcc00', tsNum:'31', tsUnit:'m' },
+  { id:'A-005', msgKey:'anomaly5', severity:'info',     color:'#00e5ff', tsNum:'1',  tsUnit:'h' },
 ]
 
 // ─── helpers ──────────────────────────────────
@@ -68,6 +68,8 @@ const NeonDot = (color, isAnchor = false) => (props) => {
 // Scatter tooltip
 function ScatterTooltip({ active, payload }) {
   const { isDark } = useTheme()
+  const { t } = useI18n()
+  const d = t.diagnostics
   if (!active || !payload?.length) return null
   const pt = payload[0]?.payload
   const clusterName = pt?.cluster ?? payload[0]?.name ?? 'Unknown'
@@ -91,14 +93,14 @@ function ScatterTooltip({ active, payload }) {
       )}
       <div className="space-y-0.5">
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          Total Activity: <span className="font-bold" style={{ color }}>{Math.round(pt?.x)}</span>
+          {d.totalActivityShort}: <span className="font-bold" style={{ color }}>{Math.round(pt?.x)}</span>
         </p>
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          Frustration Index: <span className="font-bold" style={{ color }}>{(+pt?.y).toFixed(2)}</span>
+          {d.frustrationIndex}: <span className="font-bold" style={{ color }}>{(+pt?.y).toFixed(2)}</span>
         </p>
         {pt?.risk_score != null && (
           <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-            Risk Score: <span className="font-bold" style={{ color }}>{(pt.risk_score * 100).toFixed(0)}%</span>
+            {d.riskScore}: <span className="font-bold" style={{ color }}>{(pt.risk_score * 100).toFixed(0)}%</span>
           </p>
         )}
       </div>
@@ -167,6 +169,11 @@ export default function Diagnostics() {
   const { isDark } = useTheme()
   const accent    = getAccent(isDark)
   const d = t.diagnostics
+  const ANOMALIES = ANOMALIES_RAW.map(a => ({
+    ...a,
+    msg: d[a.msgKey] || a.msgKey,
+    ts: a.tsNum + (a.tsUnit === 'h' ? d.hAgo : d.mAgo),
+  }))
   const textMuted = isDark ? 'text-white/35' : 'text-black/40'
   const textMain  = isDark ? 'text-white' : 'text-black'
   const tickFill  = isDark ? '#555' : '#aaa'
@@ -187,7 +194,7 @@ export default function Diagnostics() {
     if (!id) return
     setShapLoading(true); setShapError(null); setShapData(null)
     const data = await fetchShap(id)
-    if (!data) setShapError(`No ML record for user "${id}". Available IDs: 0, 1, 3, 4, 5`)
+    if (!data) setShapError(`${d.noMlRecord} "${id}". ${d.availableIds}`)
     else setShapData(data)
     setShapLoading(false)
   }
@@ -215,9 +222,9 @@ export default function Diagnostics() {
   const technicalPts = byCluster('Technical')
 
   const clusterLegend = [
-    { key: 'Healthy',   label: 'Low Risk — Healthy',           color: CLUSTER_COLORS.Healthy,   pts: healthyPts },
-    { key: 'Technical', label: 'Technical Churn Risk',          color: CLUSTER_COLORS.Technical, pts: technicalPts },
-    { key: 'Voluntary', label: 'Voluntary Churn Risk',          color: CLUSTER_COLORS.Voluntary, pts: voluntaryPts },
+    { key: 'Healthy',   label: d.lowRiskHealthy,                color: CLUSTER_COLORS.Healthy,   pts: healthyPts },
+    { key: 'Technical', label: d.techChurnRisk,                 color: CLUSTER_COLORS.Technical, pts: technicalPts },
+    { key: 'Voluntary', label: d.volChurnRisk,                  color: CLUSTER_COLORS.Voluntary, pts: voluntaryPts },
   ]
 
   const triggerRetrain = () => {
@@ -226,12 +233,12 @@ export default function Diagnostics() {
   }
 
   const metrics = [
-    { label: d.f1Score,      value: '0.87', sub: '↑ +0.03 from last retrain',    color: '#ccff00', icon: TrendingUp, bar: 87 },
-    { label: d.precision,    value: '0.89', sub: 'True positive rate on test set', color: '#00e5ff', icon: Shield,    bar: 89 },
-    { label: d.recall,       value: '0.85', sub: 'Sensitivity across all classes', color: '#ff8800', icon: Activity,  bar: 85 },
-    { label: d.confidence,   value: '91%',  sub: 'Avg confidence on live cohort',  color: '#ccff00', icon: Brain,     bar: 91 },
-    { label: d.aucRoc,       value: '0.94', sub: 'Binary classification score',    color: '#8800ff', icon: Zap,       bar: 94 },
-    { label: d.trainingSize, value: '284K', sub: d.trainingSizeVal,                color: '#00e5ff', icon: Database,  bar: null },
+    { label: d.f1Score,      value: '0.87', sub: d.f1Sub,          color: '#ccff00', icon: TrendingUp, bar: 87 },
+    { label: d.precision,    value: '0.89', sub: d.precisionSub,   color: '#00e5ff', icon: Shield,    bar: 89 },
+    { label: d.recall,       value: '0.85', sub: d.recallSub,      color: '#ff8800', icon: Activity,  bar: 85 },
+    { label: d.confidence,   value: '91%',  sub: d.confidenceSub,  color: '#ccff00', icon: Brain,     bar: 91 },
+    { label: d.aucRoc,       value: '0.94', sub: d.aucRocSub,      color: '#8800ff', icon: Zap,       bar: 94 },
+    { label: d.trainingSize, value: '284K', sub: d.trainingSizeVal, color: '#00e5ff', icon: Database,  bar: null },
   ]
 
   return (
@@ -257,7 +264,7 @@ export default function Diagnostics() {
           className="btn-lime flex items-center gap-2 px-5 py-3 rounded-xl text-sm self-start sm:self-auto"
         >
           <RefreshCw size={14} strokeWidth={2.5} className={retraining ? 'animate-spin' : ''} />
-          {retraining ? 'Retraining…' : 'Trigger Retrain'}
+          {retraining ? d.retraining : d.triggerRetrain}
         </motion.button>
       </motion.div>
 
@@ -283,14 +290,14 @@ export default function Diagnostics() {
                   style={{ background: retraining ? '#ff8800' : '#ccff00',
                     boxShadow: `0 0 5px ${retraining ? '#ff8800' : '#ccff00'}` }} />
                 <span className={clsx('text-xs font-semibold', textMain)}>
-                  {retraining ? 'Retraining in progress…' : `${d.lastRetrain}: ${d.lastRetrainVal}`}
+                  {retraining ? d.retrainingInProgress : `${d.lastRetrain}: ${d.lastRetrainVal}`}
                 </span>
               </div>
               {[
-                ['Training samples', d.trainingSizeVal],
-                ['Inference latency', '12ms p95'],
-                ['Model version', 'v7.3.1'],
-                ['Framework', 'XGBoost + NN'],
+                [d.trainingSamples, d.trainingSizeVal],
+                [d.inferenceLatency, '12ms p95'],
+                [d.modelVersion, 'v7.3.1'],
+                [d.framework, 'XGBoost + NN'],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5">
                   <span className={clsx('text-[0.6rem]', textMuted)}>{k}:</span>
@@ -309,9 +316,9 @@ export default function Diagnostics() {
             style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div>
-                <h2 className={clsx('text-xl font-black', textMain)}>Churn Risk Cluster Map</h2>
+                <h2 className={clsx('text-xl font-black', textMain)}>{d.clusterMapTitle}</h2>
                 <p className={clsx('text-xs mt-0.5', textMuted)}>
-                  150 subscribers plotted by activity and frustration signal · ML-derived clusters
+                  {d.clusterMapSub}
                 </p>
               </div>
 
@@ -359,7 +366,7 @@ export default function Diagnostics() {
                 style={{ background: isDark ? 'rgba(10,10,10,0.7)' : 'rgba(255,255,255,0.7)' }}>
                 <div className="flex flex-col items-center gap-3">
                   <RefreshCw size={22} className="animate-spin" style={{ color: '#ccff00' }} />
-                  <span className={clsx('text-xs font-semibold', textMuted)}>Loading cluster data…</span>
+                  <span className={clsx('text-xs font-semibold', textMuted)}>{d.loadingClusters}</span>
                 </div>
               </div>
             )}
@@ -371,10 +378,10 @@ export default function Diagnostics() {
                   stroke={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)'}
                 />
                 <XAxis
-                  dataKey="x" type="number" name="Total Activity"
+                  dataKey="x" type="number" name={d.totalActivityShort}
                   domain={[0, 220]}
                   label={{
-                    value: 'Total Activity (gen_total)',
+                    value: d.totalActivity,
                     position: 'insideBottom', offset: -20,
                     fill: tickFill, fontSize: 11,
                   }}
@@ -382,9 +389,9 @@ export default function Diagnostics() {
                   axisLine={false} tickLine={false}
                 />
                 <YAxis
-                  dataKey="y" type="number" name="User Frustration Index"
+                  dataKey="y" type="number" name={d.frustrationIndex}
                   label={{
-                    value: 'User Frustration Index',
+                    value: d.frustrationIndex,
                     angle: -90, position: 'insideLeft', offset: 16,
                     fill: tickFill, fontSize: 11,
                   }}
@@ -448,14 +455,14 @@ export default function Diagnostics() {
                     style={{ background: cl.color, boxShadow: `0 0 6px ${cl.color}` }} />
                   <span className={clsx('text-xs font-semibold', textMain)}>{cl.label}</span>
                   <span className="text-xs font-black" style={{ color: cl.color }}>
-                    {cl.pts.length} users
+                    {cl.pts.length} {d.users}
                   </span>
                 </div>
               ))}
               <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-[0.6rem] font-bold"
                 style={{ background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)',
                   border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.07)' }}>
-                <span className={textMuted}>★ Anchor points = real demo users</span>
+                <span className={textMuted}>{d.anchorNote}</span>
               </div>
             </div>
           </div>
@@ -467,9 +474,9 @@ export default function Diagnostics() {
         <Card glowColor="#ccff00">
           <div className="p-5 md:p-6 border-b"
             style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
-            <h2 className={clsx('text-xl font-black', textMain)}>SHAP Explainability</h2>
+            <h2 className={clsx('text-xl font-black', textMain)}>{d.shapTitle}</h2>
             <p className={clsx('text-xs mt-0.5', textMuted)}>
-              Enter a user ID to see why the model predicted their churn risk
+              {d.shapSub}
             </p>
           </div>
 
@@ -481,7 +488,7 @@ export default function Diagnostics() {
                 value={shapQuery}
                 onChange={e => setShapQuery(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && runShapQuery()}
-                placeholder="User ID (e.g. 0, 1, 3, 4, 5)"
+                placeholder={d.shapPlaceholder}
                 className={clsx(
                   'flex-1 rounded-xl px-4 py-2.5 text-sm outline-none border transition-all',
                   isDark
@@ -496,7 +503,7 @@ export default function Diagnostics() {
                 className="btn-lime flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm disabled:opacity-40"
               >
                 <Search size={14} strokeWidth={2.5} />
-                {shapLoading ? 'Loading…' : 'Explain'}
+                {shapLoading ? d.loading : d.explain}
               </motion.button>
             </div>
 
@@ -510,7 +517,7 @@ export default function Diagnostics() {
                   User #{id}
                 </button>
               ))}
-              <span className={clsx('text-[0.6rem] self-center', textMuted)}>← click to explain</span>
+              <span className={clsx('text-[0.6rem] self-center', textMuted)}>{d.clickToExplain}</span>
             </div>
 
             {/* Error */}
@@ -544,7 +551,7 @@ export default function Diagnostics() {
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.6rem] font-bold"
             style={{ background: 'rgba(255,0,85,0.1)', border: '1px solid rgba(255,0,85,0.25)', color: '#ff0055' }}>
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#ff0055' }} />
-            {ANOMALIES.length} signals
+            {ANOMALIES.length} {d.signals}
           </div>
         </div>
 
@@ -577,7 +584,7 @@ export default function Diagnostics() {
                   </div>
                   <button className="btn-lime flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg text-[0.62rem]">
                     <Zap size={10} strokeWidth={3} />
-                    Investigate
+                    {d.investigate}
                   </button>
                 </div>
               </Card>

@@ -9,14 +9,10 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts'
-
-const data = [
-  { segment: 'Healthy', days: 5.9, color: '#ccff00' },
-  { segment: 'Involuntary', days: 5.7, color: '#ccff00' },
-  { segment: 'Voluntary', days: 4.3, color: '#ff0055' },
-]
+import { useI18n } from '../context/I18nContext'
 
 const CustomTooltip = ({ active, payload, label }) => {
+  const { t } = useI18n()
   if (active && payload && payload.length) {
     const color = payload[0].payload.color
     return (
@@ -31,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }) => {
           {label}
         </p>
         <p className="text-2xl font-black" style={{ color }}>
-          {payload[0].value} <span className="text-sm font-normal text-gray-400">avg days</span>
+          {payload[0].value} <span className="text-sm font-normal text-gray-400">{t.activity.avgDays}</span>
         </p>
       </div>
     )
@@ -70,6 +66,14 @@ const CustomBar = (props) => {
 }
 
 export default function ActivityChart() {
+  const { t } = useI18n()
+
+  const data = [
+    { segment: t.activity.healthy, days: 5.9, color: '#ccff00' },
+    { segment: t.activity.involuntary, days: 5.7, color: '#ccff00' },
+    { segment: t.activity.voluntary, days: 4.3, color: '#ff0055' },
+  ]
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -80,17 +84,17 @@ export default function ActivityChart() {
     >
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-bold text-white">Engagement Activity</h3>
-          <p className="text-xs text-gray-500 mt-1">Average days active before churn event</p>
+          <h3 className="text-lg font-bold text-white">{t.activity.title}</h3>
+          <p className="text-xs text-gray-500 mt-1">{t.activity.sub}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm" style={{ background: '#ccff00', boxShadow: '0 0 6px #ccff00' }} />
-            <span className="text-xs text-gray-400">Recoverable</span>
+            <span className="text-xs text-gray-400">{t.activity.recoverable}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm" style={{ background: '#ff0055', boxShadow: '0 0 6px #ff0055' }} />
-            <span className="text-xs text-gray-400">Lost</span>
+            <span className="text-xs text-gray-400">{t.activity.lost}</span>
           </div>
         </div>
       </div>

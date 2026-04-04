@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
+import { useI18n } from '../context/I18nContext'
 
 const churnTrend = [
   { month: 'Jan', voluntary: 18, involuntary: 12, recovered: 8 },
@@ -11,19 +12,6 @@ const churnTrend = [
   { month: 'May', voluntary: 21, involuntary: 13, recovered: 20 },
   { month: 'Jun', voluntary: 17, involuntary: 10, recovered: 22 },
   { month: 'Jul', voluntary: 15, involuntary:  9, recovered: 25 },
-]
-
-const lines = [
-  { key: 'voluntary',   name: 'Voluntary',   color: '#ff0055', grad: 'gradVol' },
-  { key: 'involuntary', name: 'Involuntary',  color: '#ccff00', grad: 'gradInv' },
-  { key: 'recovered',   name: 'Recovered',   color: '#00ccff', grad: 'gradRec' },
-]
-
-const kpis = [
-  { label: 'Avg Recovery Rate',          value: '38.2%', color: '#ccff00', delta: '+4.1%'       },
-  { label: 'Prediction Accuracy',        value: '91.7%', color: '#00ccff', delta: '+1.3%'       },
-  { label: 'Interventions Triggered',    value: '4,821', color: '#ccff00', delta: 'this month'  },
-  { label: 'ARR Recovered',              value: '$1.8M', color: '#ff8800', delta: 'YTD'         },
 ]
 
 const CustomTooltip = ({ active, payload, label }) => {
@@ -44,12 +32,27 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function Analytics() {
+  const { t } = useI18n()
+
+  const lines = [
+    { key: 'voluntary',   name: t.analytics.voluntary,   color: '#ff0055', grad: 'gradVol' },
+    { key: 'involuntary', name: t.analytics.involuntary,  color: '#ccff00', grad: 'gradInv' },
+    { key: 'recovered',   name: t.analytics.recovered,   color: '#00ccff', grad: 'gradRec' },
+  ]
+
+  const kpis = [
+    { label: t.analytics.avgRecovery,      value: '38.2%', color: '#ccff00', delta: '+4.1%'              },
+    { label: t.analytics.predAccuracy,      value: '91.7%', color: '#00ccff', delta: '+1.3%'              },
+    { label: t.analytics.interventions,     value: '4,821', color: '#ccff00', delta: t.analytics.thisMonth },
+    { label: t.analytics.arrRecovered,      value: '$1.8M', color: '#ff8800', delta: 'YTD'                },
+  ]
+
   return (
     <div className="space-y-5 md:space-y-8">
       <div>
-        <h2 className="text-2xl sm:text-3xl font-black text-white">Analytics</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-white">{t.analytics.title}</h2>
         <p className="text-white/35 mt-1 text-xs md:text-sm">
-          Longitudinal churn analysis and recovery trends
+          {t.analytics.sub}
         </p>
       </div>
 
@@ -61,8 +64,8 @@ export default function Analytics() {
       >
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
-            <h3 className="text-base md:text-lg font-bold text-white">Churn vs Recovery Rate (%)</h3>
-            <p className="text-[0.65rem] text-white/30 mt-0.5">7-month rolling window</p>
+            <h3 className="text-base md:text-lg font-bold text-white">{t.analytics.chartTitle}</h3>
+            <p className="text-[0.65rem] text-white/30 mt-0.5">{t.analytics.chartSub}</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {lines.map(l => (
@@ -107,7 +110,7 @@ export default function Analytics() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {kpis.map((kpi, i) => (
           <motion.div
-            key={kpi.label}
+            key={i}
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25 + i * 0.07 }}
