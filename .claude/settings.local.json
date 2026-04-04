@@ -15,7 +15,11 @@
       "Bash(git add:*)",
       "Bash(git commit -m ':*)",
       "Bash(git push:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(sed -i '' '177s/user'\\\\''s most-used/user\\\\u2019s most-used/' /Users/altynayyertay/IdeaProjects/retention-architect-web/src/components/ChurnSplitView.jsx)",
+      "Bash(sed -n '177p' /Users/altynayyertay/IdeaProjects/retention-architect-web/src/components/ChurnSplitView.jsx)",
+      "Bash(python3:*)",
+      "Bash(ls -la /Users/altynayyertay/IdeaProjects/retention-architect-web/src/components/*.jsx)"
     ]
   }
 }
