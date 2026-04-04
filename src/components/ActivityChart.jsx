@@ -75,12 +75,8 @@ export default function ActivityChart() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.5 }}
-      className="rounded-2xl p-6"
-      style={{
-        background: 'rgba(10,10,10,0.9)',
-        border: '1px solid #1a1a1a',
-        boxShadow: '0 0 40px rgba(204,255,0,0.05)',
-      }}
+      className="glass-card rounded-2xl p-5 md:p-6"
+      style={{ boxShadow: '0 0 40px rgba(204,255,0,0.04)' }}
     >
       <div className="flex items-center justify-between mb-6">
         <div>

@@ -48,19 +48,15 @@ export default function TechFailureChart() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5, duration: 0.5 }}
-      className="rounded-2xl p-6"
-      style={{
-        background: 'rgba(10,10,10,0.9)',
-        border: '1px solid #1a1a1a',
-        boxShadow: '0 0 40px rgba(255,0,85,0.05)',
-      }}
+      className="glass-card rounded-2xl p-5 md:p-6"
+      style={{ boxShadow: '0 0 40px rgba(255,0,85,0.04)' }}
     >
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-white">Technical Failure Breakdown</h3>
-        <p className="text-xs text-gray-500 mt-1">Involuntary churn causes — automated recovery eligible</p>
+      <div className="mb-4 md:mb-6">
+        <h3 className="text-base md:text-lg font-bold text-white">Technical Failure Breakdown</h3>
+        <p className="text-[0.65rem] text-white/30 mt-0.5">Involuntary churn causes — automated recovery eligible</p>
       </div>
 
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6">
         <div className="flex-shrink-0">
           <ResponsiveContainer width={220} height={220}>
             <PieChart>

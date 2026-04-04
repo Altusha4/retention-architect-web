@@ -5,31 +5,35 @@ import TechFailureChart from './TechFailureChart'
 import { ArrowRight, Zap, TrendingUp } from 'lucide-react'
 
 const recentAlerts = [
-  { id: 'USR-001', name: 'Aisha Bekova', event: 'Payment retry failed (3rd attempt)', severity: 'critical', time: '2m ago' },
-  { id: 'USR-447', name: 'Temirkhan Abdi', event: 'Session frequency dropped 70%', severity: 'warning', time: '14m ago' },
-  { id: 'USR-883', name: 'Lila Ospanova', event: 'Visited cancellation page twice', severity: 'warning', time: '31m ago' },
-  { id: 'USR-219', name: 'Nurzhan Bekmukhanov', event: 'Downgrade intent signal detected', severity: 'moderate', time: '1h ago' },
+  { id: 'USR-001', name: 'Aisha Bekova',        event: 'Payment retry failed (3rd attempt)',   severity: 'critical', time: '2m ago' },
+  { id: 'USR-447', name: 'Temirkhan Abdi',      event: 'Session frequency dropped 70%',        severity: 'warning',  time: '14m ago' },
+  { id: 'USR-883', name: 'Lila Ospanova',       event: 'Visited cancellation page twice',      severity: 'warning',  time: '31m ago' },
+  { id: 'USR-219', name: 'Nurzhan Bekmukhanov', event: 'Downgrade intent signal detected',     severity: 'moderate', time: '1h ago' },
 ]
 
-const severityStyle = {
-  critical: { color: '#ff0055', bg: 'rgba(255,0,85,0.1)', label: 'CRITICAL' },
-  warning: { color: '#ff8800', bg: 'rgba(255,136,0,0.1)', label: 'WARNING' },
-  moderate: { color: '#ffcc00', bg: 'rgba(255,204,0,0.1)', label: 'MODERATE' },
+const sevStyle = {
+  critical: { color: '#ff0055', bg: 'rgba(255,0,85,0.08)',   border: 'rgba(255,0,85,0.18)',   label: 'CRITICAL' },
+  warning:  { color: '#ff8800', bg: 'rgba(255,136,0,0.08)', border: 'rgba(255,136,0,0.18)', label: 'WARNING'  },
+  moderate: { color: '#ffcc00', bg: 'rgba(255,204,0,0.08)', border: 'rgba(255,204,0,0.18)', label: 'MODERATE' },
 }
 
 export default function Dashboard() {
   return (
-    <div className="space-y-8">
-      {/* Page Header */}
-      <div className="flex items-start justify-between">
+    <div className="space-y-6 md:space-y-8">
+
+      {/* ── Page header ── */}
+      <div className="flex items-start justify-between gap-4">
         <div>
           <motion.h1
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-4xl font-black text-white leading-tight"
+            className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight"
           >
             Diagnostic{' '}
-            <span style={{ color: '#ccff00', textShadow: '0 0 30px rgba(204,255,0,0.5)' }}>
+            <span
+              className="neon-lime"
+              style={{ color: '#ccff00' }}
+            >
               Dashboard
             </span>
           </motion.h1>
@@ -37,33 +41,36 @@ export default function Dashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
-            className="text-gray-500 mt-1 text-sm"
+            className="text-white/35 mt-1 text-xs md:text-sm"
           >
-            Real-time churn intelligence & retention signals
+            Real-time churn intelligence &amp; retention signals
           </motion.p>
         </div>
 
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold"
+          transition={{ delay: 0.15 }}
+          className="hidden sm:flex flex-shrink-0 items-center gap-2 px-3 py-1.5 rounded-full text-[0.65rem] font-bold"
           style={{
-            background: 'rgba(204,255,0,0.1)',
-            border: '1px solid rgba(204,255,0,0.3)',
+            background: 'rgba(204,255,0,0.07)',
+            border: '1px solid rgba(204,255,0,0.2)',
             color: '#ccff00',
           }}
         >
-          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#ccff00', boxShadow: '0 0 6px #ccff00' }} />
-          LIVE · Updated 3s ago
+          <div
+            className="w-1.5 h-1.5 rounded-full animate-pulse"
+            style={{ background: '#ccff00', boxShadow: '0 0 5px #ccff00' }}
+          />
+          LIVE · 3s ago
         </motion.div>
       </div>
 
-      {/* Hero Stats */}
+      {/* ── Hero Stats ── */}
       <HeroStats />
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      {/* ── Charts ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-5">
         <div className="lg:col-span-3">
           <ActivityChart />
         </div>
@@ -72,56 +79,57 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Recent Alerts */}
+      {/* ── Alert Feed ── */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="rounded-2xl p-6"
-        style={{
-          background: 'rgba(10,10,10,0.9)',
-          border: '1px solid #1a1a1a',
-        }}
+        transition={{ delay: 0.5 }}
+        className="glass-card rounded-2xl p-5 md:p-6"
       >
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-lg font-bold text-white">Live Risk Alerts</h3>
-            <p className="text-xs text-gray-500 mt-0.5">Triggered by behavioral ML signals</p>
+            <h3 className="text-base md:text-lg font-bold text-white">Live Risk Alerts</h3>
+            <p className="text-[0.65rem] text-white/30 mt-0.5">Triggered by behavioural ML signals</p>
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-semibold transition-colors"
+          <button className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-70"
             style={{ color: '#ccff00' }}>
-            View all <ArrowRight size={13} />
+            View all <ArrowRight size={12} />
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {recentAlerts.map((alert, i) => {
-            const sev = severityStyle[alert.severity]
+            const sev = sevStyle[alert.severity]
             return (
               <motion.div
                 key={alert.id}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7 + i * 0.08 }}
-                className="flex items-center justify-between p-4 rounded-xl"
-                style={{ background: sev.bg, border: `1px solid ${sev.color}22` }}
+                transition={{ delay: 0.55 + i * 0.07 }}
+                className="flex items-center justify-between gap-3 p-3 md:p-4 rounded-xl"
+                style={{ background: sev.bg, border: `1px solid ${sev.border}` }}
               >
-                <div className="flex items-center gap-4">
-                  <div className="w-2 h-2 rounded-full" style={{ background: sev.color, boxShadow: `0 0 6px ${sev.color}` }} />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{alert.name}</span>
-                      <span className="text-xs text-gray-600 font-mono">{alert.id}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ background: sev.color, boxShadow: `0 0 5px ${sev.color}` }}
+                  />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs md:text-sm font-semibold text-white truncate">{alert.name}</span>
+                      <span className="text-[0.6rem] text-white/30 font-mono hidden sm:inline">{alert.id}</span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">{alert.event}</p>
+                    <p className="text-[0.62rem] md:text-xs text-white/40 mt-0.5 truncate">{alert.event}</p>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-md"
-                    style={{ color: sev.color, background: `${sev.color}18` }}>
+                <div className="flex-shrink-0 text-right">
+                  <span
+                    className="text-[0.6rem] font-bold px-2 py-0.5 rounded-md whitespace-nowrap"
+                    style={{ color: sev.color, background: `${sev.color}18` }}
+                  >
                     {sev.label}
                   </span>
-                  <p className="text-xs text-gray-600 mt-1">{alert.time}</p>
+                  <p className="text-[0.6rem] text-white/25 mt-1">{alert.time}</p>
                 </div>
               </motion.div>
             )
@@ -129,39 +137,46 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Bottom CTA */}
+      {/* ── ARR Recovery CTA ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        className="rounded-2xl p-6 relative overflow-hidden"
+        transition={{ delay: 0.8 }}
+        className="rounded-2xl p-5 md:p-6 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, rgba(204,255,0,0.08), rgba(0,0,0,0))',
-          border: '1px solid rgba(204,255,0,0.2)',
+          background: 'linear-gradient(135deg, rgba(204,255,0,0.07) 0%, rgba(0,0,0,0) 60%)',
+          border: '1px solid rgba(204,255,0,0.18)',
         }}
       >
-        <div className="absolute right-0 top-0 w-64 h-full opacity-5"
-          style={{ background: 'radial-gradient(circle at right, #ccff00, transparent 70%)' }} />
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp size={16} style={{ color: '#ccff00' }} />
-              <span className="text-xs font-bold tracking-widest uppercase" style={{ color: '#ccff00' }}>
+        <div
+          className="absolute right-0 top-0 w-1/2 h-full opacity-[0.04]"
+          style={{ background: 'radial-gradient(circle at right, #ccff00, transparent 70%)' }}
+        />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <TrendingUp size={14} style={{ color: '#ccff00' }} />
+              <span
+                className="text-[0.6rem] font-bold tracking-[0.18em] uppercase"
+                style={{ color: '#ccff00' }}
+              >
                 Retention Potential
               </span>
             </div>
-            <p className="text-xl font-black text-white">
-              Recover up to <span style={{ color: '#ccff00' }}>$2.4M ARR</span> with automated interventions
+            <p className="text-lg md:text-xl font-black text-white leading-snug">
+              Recover up to{' '}
+              <span className="neon-lime" style={{ color: '#ccff00' }}>$2.4M ARR</span>
+              {' '}with automated interventions
             </p>
-            <p className="text-xs text-gray-500 mt-1">Based on historical conversion rates and risk model confidence scores</p>
+            <p className="text-[0.62rem] text-white/30 mt-1">
+              Based on historical conversion rates and risk model confidence scores
+            </p>
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap"
-            style={{
-              background: '#ccff00',
-              color: '#000',
-              boxShadow: '0 0 20px rgba(204,255,0,0.4)',
-            }}>
-            <Zap size={15} strokeWidth={3} />
+          <button
+            className="btn-lime flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm whitespace-nowrap self-start sm:self-auto"
+          >
+            <Zap size={14} strokeWidth={3} />
             Launch Campaign
           </button>
         </div>

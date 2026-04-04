@@ -8,7 +8,19 @@
   }
 
   html {
-    font-size: 20px; /* 25% larger than standard 16px */
+    font-size: 16px;
+  }
+
+  @media (min-width: 768px) {
+    html { font-size: 17px; }
+  }
+
+  @media (min-width: 1024px) {
+    html { font-size: 18px; }
+  }
+
+  @media (min-width: 1536px) {
+    html { font-size: 20px; }
   }
 
   body {
@@ -18,61 +30,97 @@
     margin: 0;
     padding: 0;
     min-height: 100vh;
-    background: radial-gradient(ellipse at center, #000000 60%, #0a0a0a 100%);
+    background: radial-gradient(ellipse at 50% 0%, #0a0a0a 0%, #000000 70%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ccff00; }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(10, 10, 10, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
   }
 
-  ::-webkit-scrollbar-track {
-    background: #0a0a0a;
+  .glass-sidebar {
+    background: rgba(4, 4, 4, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-right: 1px solid rgba(204, 255, 0, 0.15);
   }
 
-  ::-webkit-scrollbar-thumb {
-    background: #1a1a1a;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
+  .nav-item-active {
     background: #ccff00;
+    color: #000000;
+    box-shadow: 0 0 20px rgba(204,255,0,0.35), 0 0 40px rgba(204,255,0,0.12);
+  }
+
+  .nav-item-idle {
+    color: #666;
+    transition: color 0.2s, background 0.2s;
+  }
+
+  .nav-item-idle:hover {
+    color: #ffffff;
+    background: rgba(255,255,255,0.05);
+  }
+
+  .btn-lime {
+    background: #ccff00;
+    color: #000000;
+    font-weight: 700;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 20px rgba(204,255,0,0.35), 0 0 40px rgba(204,255,0,0.12);
+    transition: box-shadow 0.2s, transform 0.15s;
+  }
+
+  .btn-lime:hover {
+    box-shadow: 0 0 30px rgba(204,255,0,0.55), 0 0 60px rgba(204,255,0,0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-lime:active {
+    transform: scale(0.97);
+  }
+
+  .btn-lime:disabled {
+    opacity: 0.45;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
   }
 }
 
 @layer utilities {
   .neon-lime {
     text-shadow:
-      0 0 10px rgba(204, 255, 0, 0.8),
-      0 0 20px rgba(204, 255, 0, 0.6),
-      0 0 40px rgba(204, 255, 0, 0.4),
-      0 0 80px rgba(204, 255, 0, 0.2);
+      0 0 10px rgba(204, 255, 0, 0.9),
+      0 0 25px rgba(204, 255, 0, 0.55),
+      0 0 50px rgba(204, 255, 0, 0.3);
   }
 
   .neon-magenta {
     text-shadow:
-      0 0 10px rgba(255, 0, 85, 0.8),
-      0 0 20px rgba(255, 0, 85, 0.6),
-      0 0 40px rgba(255, 0, 85, 0.4);
+      0 0 10px rgba(255, 0, 85, 0.9),
+      0 0 25px rgba(255, 0, 85, 0.55),
+      0 0 50px rgba(255, 0, 85, 0.3);
   }
 
-  .neon-border-lime {
-    box-shadow:
-      0 0 8px rgba(204, 255, 0, 0.4),
-      0 0 20px rgba(204, 255, 0, 0.2),
-      inset 0 0 8px rgba(204, 255, 0, 0.05);
+  .neon-white {
+    text-shadow:
+      0 0 10px rgba(255,255,255,0.6),
+      0 0 25px rgba(255,255,255,0.3);
   }
 
-  .neon-border-magenta {
-    box-shadow:
-      0 0 8px rgba(255, 0, 85, 0.4),
-      0 0 20px rgba(255, 0, 85, 0.2),
-      inset 0 0 8px rgba(255, 0, 85, 0.05);
-  }
-
-  .glass-surface {
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  .glow-lime-border {
+    box-shadow: 0 0 0 1px rgba(204,255,0,0.3), 0 0 20px rgba(204,255,0,0.12);
   }
 
   .scanline::after {
@@ -83,9 +131,36 @@
       0deg,
       transparent,
       transparent 2px,
-      rgba(0, 0, 0, 0.03) 2px,
-      rgba(0, 0, 0, 0.03) 4px
+      rgba(0, 0, 0, 0.025) 2px,
+      rgba(0, 0, 0, 0.025) 4px
     );
     pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Tooltip */
+  .tooltip-wrap { position: relative; }
+  .tooltip-wrap .tooltip {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+    background: rgba(10,10,10,0.95);
+    border: 1px solid rgba(204,255,0,0.25);
+    color: #ccff00;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 8px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    box-shadow: 0 0 14px rgba(204,255,0,0.2);
+  }
+  .tooltip-wrap:hover .tooltip {
+    opacity: 1;
   }
 }

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
   Search,
@@ -8,100 +8,232 @@ import {
   Settings,
   Zap,
   ChevronRight,
+  X,
 } from 'lucide-react'
 import { clsx } from 'clsx'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'search', label: 'Deep Scan', icon: Search },
-  { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-  { id: 'alerts', label: 'Risk Alerts', icon: AlertTriangle },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  { id: 'search',    label: 'Deep Scan',  icon: Search },
+  { id: 'analytics', label: 'Analytics',  icon: BarChart3 },
+  { id: 'alerts',    label: 'Risk Alerts',icon: AlertTriangle },
+  { id: 'settings',  label: 'Settings',   icon: Settings },
 ]
 
-export default function Sidebar({ activeView, onNavigate }) {
-  return (
-    <aside className="w-64 min-h-screen bg-surface border-r border-muted flex flex-col relative">
-      {/* Scanline effect */}
-      <div className="absolute inset-0 pointer-events-none"
+export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, isMobile }) {
+  const ref = useRef(null)
+
+  // Close on outside click (mobile overlay)
+  useEffect(() => {
+    if (!isMobile || isCollapsed) return
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) onClose()
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [isMobile, isCollapsed, onClose])
+
+  const sidebarContent = (
+    <div
+      ref={ref}
+      className={clsx(
+        'glass-sidebar relative flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden',
+        isCollapsed ? 'w-[68px]' : 'w-64',
+      )}
+      style={{
+        boxShadow: isCollapsed
+          ? 'none'
+          : '4px 0 40px rgba(204,255,0,0.06)',
+      }}
+    >
+      {/* Scanline overlay */}
+      <div className="absolute inset-0 pointer-events-none z-0"
         style={{
-          background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px)'
+          background: 'repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px)',
         }}
       />
 
-      {/* Logo */}
-      <div className="p-6 border-b border-muted">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: '#ccff00', boxShadow: '0 0 16px rgba(204,255,0,0.6)' }}>
-            <Zap size={16} color="#000" strokeWidth={3} />
-          </div>
-          <div>
-            <p className="text-xs font-bold tracking-[0.2em] text-white uppercase leading-none">
-              Retention
-            </p>
-            <p className="text-xs font-bold tracking-[0.2em] uppercase leading-none" style={{ color: '#ccff00' }}>
-              Architect
-            </p>
-          </div>
+      {/* ── Logo ─────────────────────────────────── */}
+      <div className={clsx(
+        'relative z-10 flex items-center border-b border-white/[0.06] transition-all duration-300',
+        isCollapsed ? 'px-3 py-5 justify-center' : 'px-5 py-5 gap-3',
+      )}>
+        {/* Icon mark */}
+        <div
+          className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+          style={{
+            background: '#ccff00',
+            boxShadow: '0 0 16px rgba(204,255,0,0.55), 0 0 32px rgba(204,255,0,0.2)',
+          }}
+        >
+          <Zap size={17} color="#000" strokeWidth={3} />
         </div>
-        <div className="mt-3">
-          <span className="text-xs px-2 py-0.5 rounded-full border font-mono"
-            style={{ borderColor: '#ccff00', color: '#ccff00', fontSize: '0.55rem', letterSpacing: '0.1em' }}>
-            HackNU 2026
-          </span>
-        </div>
+
+        {/* Wordmark */}
+        <AnimatePresence initial={false}>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: 'auto' }}
+              exit={{ opacity: 0, width: 0 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="overflow-hidden whitespace-nowrap"
+            >
+              <p
+                className="text-xl font-black tracking-tight leading-none neon-lime"
+                style={{ color: '#ccff00', letterSpacing: '-0.02em' }}
+              >
+                Wins
+              </p>
+              <p className="text-[0.6rem] font-semibold tracking-[0.18em] text-white/40 uppercase mt-0.5">
+                Retention Engine
+              </p>
+              <span
+                className="inline-block mt-1.5 text-[0.52rem] px-2 py-0.5 rounded-full border font-mono font-bold tracking-widest"
+                style={{ borderColor: 'rgba(204,255,0,0.35)', color: 'rgba(204,255,0,0.7)' }}
+              >
+                HackNU 2026
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile close */}
+        {isMobile && !isCollapsed && (
+          <button
+            onClick={onClose}
+            className="ml-auto flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <X size={15} />
+          </button>
+        )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      {/* ── Nav ──────────────────────────────────── */}
+      <nav className="relative z-10 flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
         {navItems.map((item) => {
           const Icon = item.icon
           const isActive = activeView === item.id
           return (
-            <motion.button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              whileHover={{ x: 4 }}
-              whileTap={{ scale: 0.97 }}
-              className={clsx(
-                'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-200',
-                isActive
-                  ? 'text-black font-bold'
-                  : 'text-gray-400 hover:text-white hover:bg-muted'
+            <div key={item.id} className="tooltip-wrap">
+              <motion.button
+                onClick={() => { onNavigate(item.id); if (isMobile) onClose() }}
+                whileTap={{ scale: 0.95 }}
+                className={clsx(
+                  'w-full flex items-center rounded-xl transition-all duration-200 outline-none',
+                  isCollapsed ? 'justify-center px-0 py-3' : 'gap-3 px-3 py-3',
+                  isActive ? 'nav-item-active font-bold' : 'nav-item-idle',
+                )}
+              >
+                <Icon
+                  size={22}
+                  strokeWidth={isActive ? 2.5 : 1.75}
+                  className="flex-shrink-0"
+                />
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -8 }}
+                      transition={{ duration: 0.18 }}
+                      className="text-sm font-medium flex-1 text-left whitespace-nowrap"
+                    >
+                      {item.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                {!isCollapsed && isActive && (
+                  <ChevronRight size={13} className="flex-shrink-0" />
+                )}
+              </motion.button>
+
+              {/* Icon-only tooltip */}
+              {isCollapsed && (
+                <span className="tooltip">{item.label}</span>
               )}
-              style={isActive ? {
-                background: '#ccff00',
-                boxShadow: '0 0 20px rgba(204,255,0,0.4), 0 0 40px rgba(204,255,0,0.15)',
-              } : {}}
-            >
-              <Icon size={18} strokeWidth={isActive ? 2.5 : 1.5} />
-              <span className="text-sm font-medium">{item.label}</span>
-              {isActive && <ChevronRight size={14} className="ml-auto" />}
-            </motion.button>
+            </div>
           )
         })}
       </nav>
 
-      {/* System Status */}
-      <div className="p-4 border-t border-muted">
-        <div className="rounded-xl p-3" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#ccff00', boxShadow: '0 0 6px #ccff00' }} />
-            <span className="text-xs font-semibold text-gray-300">SYSTEM ONLINE</span>
+      {/* ── Status Footer ────────────────────────── */}
+      <div className={clsx(
+        'relative z-10 border-t border-white/[0.06] transition-all duration-300',
+        isCollapsed ? 'p-2' : 'p-3',
+      )}>
+        {isCollapsed ? (
+          /* Collapsed: just a pulsing dot */
+          <div className="flex justify-center py-2">
+            <div
+              className="w-2.5 h-2.5 rounded-full"
+              style={{ background: '#ccff00', boxShadow: '0 0 8px #ccff00' }}
+            />
           </div>
-          <div className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500">Engine</span>
-              <span style={{ color: '#ccff00' }} className="font-mono">v2.4.1</span>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="rounded-xl p-3"
+            style={{ background: 'rgba(204,255,0,0.04)', border: '1px solid rgba(204,255,0,0.1)' }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div
+                className="w-2 h-2 rounded-full animate-pulse"
+                style={{ background: '#ccff00', boxShadow: '0 0 6px #ccff00' }}
+              />
+              <span className="text-[0.62rem] font-bold tracking-[0.14em] text-white/70 uppercase">
+                System Online
+              </span>
             </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-gray-500">Models</span>
-              <span style={{ color: '#ccff00' }} className="font-mono">7 active</span>
+            <div className="space-y-1">
+              {[['Engine', 'v2.4.1'], ['Models', '7 active'], ['Uptime', '99.98%']].map(([k, v]) => (
+                <div key={k} className="flex justify-between">
+                  <span className="text-[0.65rem] text-white/30">{k}</span>
+                  <span className="text-[0.65rem] font-mono font-semibold" style={{ color: '#ccff00' }}>{v}</span>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
       </div>
-    </aside>
+    </div>
   )
+
+  // Mobile: render as fixed overlay
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        {!isCollapsed && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
+              onClick={onClose}
+            />
+            {/* Drawer */}
+            <motion.div
+              key="drawer"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              className="fixed left-0 top-0 bottom-0 z-50 h-full"
+            >
+              {sidebarContent}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    )
+  }
+
+  // Desktop: inline
+  return sidebarContent
 }
