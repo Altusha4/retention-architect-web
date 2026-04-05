@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { clsx } from 'clsx'
 
 const fadeUp = (delay = 0) => ({
@@ -163,23 +164,24 @@ function ChurnColumn({ title, accentColor, causes, timeline, stats, source, icon
 export default function ChurnSplitView() {
   const { t } = useI18n()
   const { isDark } = useTheme()
+  const { t } = useI18n()
   const textMuted = isDark ? 'text-white/40' : 'text-black/50'
   const textMain  = isDark ? 'text-white'    : 'text-black'
 
   const involuntaryTimeline = [
-    { label: t.churnSplit.invStep1, time: '0h',  detail: 'Card decline detected. ML model flags user as involuntary-churn risk. Grace period clock starts.' },
-    { label: t.churnSplit.invStep2, time: '1h',  detail: 'Smart retry with alternate payment method if available. Success rate: 31% on first retry.' },
-    { label: t.churnSplit.invStep3, time: '24h', detail: 'Customer Success Manager receives alert with user profile and payment history.' },
-    { label: t.churnSplit.invStep4, time: '48h', detail: 'Second automated retry with optimized timing (off-peak hours, local timezone).' },
-    { label: t.churnSplit.invStep5, time: '72h', detail: 'Grace period ends. Personalized email + in-app banner. Offer payment plan if needed.' },
+    { label: t.churnSplit.invStep1, time: '0h',  detail: t.churnSplit.invStep1Detail },
+    { label: t.churnSplit.invStep2, time: '1h',  detail: t.churnSplit.invStep2Detail },
+    { label: t.churnSplit.invStep3, time: '24h', detail: t.churnSplit.invStep3Detail },
+    { label: t.churnSplit.invStep4, time: '48h', detail: t.churnSplit.invStep4Detail },
+    { label: t.churnSplit.invStep5, time: '72h', detail: t.churnSplit.invStep5Detail },
   ]
 
   const voluntaryTimeline = [
-    { label: t.churnSplit.volStep1, time: 'Day 0',  detail: 'Model detects gen_total decline of >40% vs 30-day baseline. Churn probability crosses 0.528 threshold.' },
-    { label: t.churnSplit.volStep2, time: 'Day 1',  detail: 'Feature-specific email based on user most-used features. Open rate: 34% for targeted vs 12% generic.' },
-    { label: t.churnSplit.volStep3, time: 'Day 3',  detail: 'In-app tooltip campaign highlighting underused power features. Reduces voluntary churn by ~18%.' },
-    { label: t.churnSplit.volStep4, time: 'Day 7',  detail: 'High-risk users (score ≥0.75) get direct outreach call. Conversion rate: 29% back to active.' },
-    { label: t.churnSplit.volStep5, time: 'Day 14', detail: 'Last resort: 20% discount or plan downgrade option. Applied only if other interventions failed.' },
+    { label: t.churnSplit.volStep1, time: 'Day 0',  detail: t.churnSplit.volStep1Detail },
+    { label: t.churnSplit.volStep2, time: 'Day 1',  detail: t.churnSplit.volStep2Detail },
+    { label: t.churnSplit.volStep3, time: 'Day 3',  detail: t.churnSplit.volStep3Detail },
+    { label: t.churnSplit.volStep4, time: 'Day 7',  detail: t.churnSplit.volStep4Detail },
+    { label: t.churnSplit.volStep5, time: 'Day 14', detail: t.churnSplit.volStep5Detail },
   ]
 
   return (
@@ -188,7 +190,7 @@ export default function ChurnSplitView() {
       <motion.div {...fadeUp(0)} className="mb-5">
         <h2 className={clsx('text-xl font-black', textMain)}>{t.churnSplit.title}</h2>
         <p className={clsx('text-xs mt-0.5', textMuted)}>
-          {t.churnSplit.subtitle}
+          {t.churnSplit.sub}
         </p>
       </motion.div>
 
@@ -198,20 +200,15 @@ export default function ChurnSplitView() {
           title={t.churnSplit.involuntaryTitle}
           accentColor="#00e5ff"
           icon={CreditCard}
-          causes={[
-            t.churnSplit.causePaymentFailure,
-            t.churnSplit.causeCardExpiry,
-            t.churnSplit.cause3DSTimeout,
-            t.churnSplit.causeInsufficientFunds,
-          ]}
+          causes={[t.churnSplit.cause1, t.churnSplit.cause2, t.churnSplit.cause3, t.churnSplit.cause4]}
           stats={[
-            { label: t.churnSplit.statSmartRecovery, value: '68%' },
-            { label: t.churnSplit.statSingleRetry,   value: '23%' },
-            { label: t.churnSplit.statRecoverableArr, value: '$1.2M' },
-            { label: t.churnSplit.statAvgGrace,       value: '72h' },
+            { label: t.churnSplit.invStat1Label, value: '68%' },
+            { label: t.churnSplit.invStat2Label, value: '23%' },
+            { label: t.churnSplit.invStat3Label, value: '$1.2M' },
+            { label: t.churnSplit.invStat4Label, value: '72h' },
           ]}
           timeline={involuntaryTimeline}
-          source="Recovery benchmarks: Focus Digital SaaS Report (2025). Smart retry scheduling based on local timezone + off-peak hours."
+          source={t.churnSplit.invSource}
           delay={0.1}
           isDark={isDark}
           t={t}
@@ -231,20 +228,15 @@ export default function ChurnSplitView() {
           title={t.churnSplit.voluntaryTitle}
           accentColor="#ff0055"
           icon={TrendingDown}
-          causes={[
-            t.churnSplit.causeLowEngagement,
-            t.churnSplit.causeFeatureUnderuse,
-            t.churnSplit.causeCompetitorSwitch,
-            t.churnSplit.causePriceSensitivity,
-          ]}
+          causes={[t.churnSplit.cause5, t.churnSplit.cause6, t.churnSplit.cause7, t.churnSplit.cause8]}
           stats={[
-            { label: t.churnSplit.statUsageDrop,      value: '41%' },
-            { label: t.churnSplit.statLeadTime,        value: '90d' },
-            { label: t.churnSplit.statChurnReduction,  value: '−22%' },
-            { label: t.churnSplit.statModelRecall,     value: '84%' },
+            { label: t.churnSplit.volStat1Label, value: '41%' },
+            { label: t.churnSplit.volStat2Label, value: '90d' },
+            { label: t.churnSplit.volStat3Label, value: '−22%' },
+            { label: t.churnSplit.volStat4Label, value: '84%' },
           ]}
           timeline={voluntaryTimeline}
-          source="Intervention effectiveness: El Attar & El-Hajj (Frontiers in AI, 2026). XAI-driven churn prediction with SHAP-guided outreach."
+          source={t.churnSplit.volSource}
           delay={0.18}
           isDark={isDark}
           t={t}

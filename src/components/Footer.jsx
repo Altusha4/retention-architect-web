@@ -27,10 +27,10 @@ export default function Footer() {
             </div>
             <div>
               <p className="text-base font-black" style={{ color: '#ccff00', letterSpacing: '-0.01em' }}>
-                WINS
+                {t.footer.brand}
               </p>
               <p className={clsx('text-xs', isDark ? 'text-white/30' : 'text-black/40')}>
-                Retention Architect Engine
+                {t.footer.subtitle}
               </p>
             </div>
           </div>
@@ -47,7 +47,7 @@ export default function Footer() {
               {t.footer.rights}
             </p>
             <p className={clsx('text-[0.5rem] mt-1.5', isDark ? 'text-white/18' : 'text-black/25')}>
-              Methodology: 3 peer-reviewed papers · Frontiers in AI · Results in Engineering · PLOS ONE
+              {t.footer.methodology}
             </p>
           </div>
 

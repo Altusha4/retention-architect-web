@@ -104,12 +104,12 @@ export default function Model() {
   }, [])
 
   const metricCards = [
-    { label: t.modelPage.accuracy,   value: (metrics.accuracy * 100).toFixed(1) + '%', sub: t.modelPage.accuracySub,   color: '#ccff00', icon: Target,   bar: Math.round(metrics.accuracy * 100) },
-    { label: t.modelPage.precision,  value: (metrics.precision * 100).toFixed(1) + '%', sub: t.modelPage.precisionSub, color: '#00e5ff', icon: TrendingUp, bar: Math.round(metrics.precision * 100) },
-    { label: t.modelPage.recall,     value: (metrics.recall * 100).toFixed(1) + '%', sub: t.modelPage.recallSub,       color: '#ff8800', icon: Activity,  bar: Math.round(metrics.recall * 100) },
-    { label: t.modelPage.f1Score,    value: metrics.f1_score.toFixed(3), sub: t.modelPage.f1ScoreSub,                  color: '#ccff00', icon: Zap,       bar: Math.round(metrics.f1_score * 100) },
-    { label: t.modelPage.aucRoc,     value: metrics.auc_roc.toFixed(3), sub: t.modelPage.aucRocSub,                    color: '#8800ff', icon: BarChart2, bar: Math.round(metrics.auc_roc * 100) },
-    { label: t.modelPage.brierScore, value: metrics.brier_score.toFixed(3), sub: t.modelPage.brierScoreSub,            color: '#00e5ff', icon: Brain,     bar: null },
+    { label: t.model.accuracy,    value: (metrics.accuracy * 100).toFixed(1) + '%', sub: t.model.accuracySub,   color: '#ccff00', icon: Target,   bar: Math.round(metrics.accuracy * 100) },
+    { label: t.model.precision,   value: (metrics.precision * 100).toFixed(1) + '%', sub: t.model.precisionSub, color: '#00e5ff', icon: TrendingUp, bar: Math.round(metrics.precision * 100) },
+    { label: t.model.recall,      value: (metrics.recall * 100).toFixed(1) + '%', sub: t.model.recallSub,       color: '#ff8800', icon: Activity,  bar: Math.round(metrics.recall * 100) },
+    { label: t.model.f1Score,     value: metrics.f1_score.toFixed(3), sub: t.model.f1Sub,                        color: '#ccff00', icon: Zap,       bar: Math.round(metrics.f1_score * 100) },
+    { label: t.model.aucRoc,      value: metrics.auc_roc.toFixed(3), sub: t.model.aucRocSub,                    color: '#8800ff', icon: BarChart2, bar: Math.round(metrics.auc_roc * 100) },
+    { label: t.model.brierScore,  value: metrics.brier_score.toFixed(3), sub: t.model.brierSub,                 color: '#00e5ff', icon: Brain,     bar: null },
   ]
 
   return (
@@ -124,8 +124,8 @@ export default function Model() {
           </div>
           <div>
             <h1 className={clsx('text-3xl md:text-4xl font-black leading-tight', textMain)}>
-              {t.modelPage.titleMain}{' '}
-              <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>{t.modelPage.titleAccent}</span>
+              {t.model.pageTitle + ' '}
+              <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>{t.model.pageTitleAccent}</span>
             </h1>
             <p className={clsx('text-sm mt-1', textMuted)}>
               {metrics.model_type}
@@ -137,9 +137,9 @@ export default function Model() {
         <div className="flex flex-wrap gap-2 sm:justify-end">
           {[
             metrics.smote_applied && 'SMOTE',
-            metrics.calibration_method && `Calibration: ${metrics.calibration_method}`,
-            `Train: ${(metrics.training_samples ?? 5634).toLocaleString()}`,
-            `Test: ${(metrics.test_samples ?? 1409).toLocaleString()}`,
+            metrics.calibration_method && (t.model.calibration + ': ' + metrics.calibration_method),
+            t.model.train + ': ' + (metrics.training_samples ?? 5634).toLocaleString(),
+            t.model.test + ': ' + (metrics.test_samples ?? 1409).toLocaleString(),
           ].filter(Boolean).map(badge => (
             <span key={badge} className="text-[0.58rem] font-bold px-2.5 py-1 rounded-lg"
               style={{ background: accentAlpha(isDark, 0.1), border: `1px solid ${accentAlpha(isDark, 0.25)}`, color: accent }}>
@@ -152,9 +152,9 @@ export default function Model() {
       {/* ── Model Metrics Grid ─────────────────────── */}
       <section>
         <motion.div {...fadeUp(0.06)} className="mb-4">
-          <h2 className={clsx('text-xl font-black', textMain)}>{t.modelPage.perfMetrics}</h2>
+          <h2 className={clsx('text-xl font-black', textMain)}>{t.model.performanceMetrics}</h2>
           <p className={clsx('text-xs mt-0.5', textMuted)}>
-            {t.modelPage.perfMetricsSub.replace('{threshold}', metrics.optimal_threshold)}
+            {t.model.evaluatedOn + ': ' + metrics.optimal_threshold}
           </p>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
@@ -170,14 +170,14 @@ export default function Model() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: accent, boxShadow: `0 0 5px ${accent}` }} />
                 <span className={clsx('text-xs font-semibold', textMain)}>
-                  {t.modelPage.ensemble}
+                  {t.model.ensemble}
                 </span>
               </div>
               {[
-                [t.modelPage.optimalThreshold, metrics.optimal_threshold],
-                [t.modelPage.featureSelection, 'Boruta + domain expert'],
-                [t.modelPage.explainability,   'SHAP TreeExplainer'],
-                [t.modelPage.oversampling,     'SMOTE'],
+                [t.model.optimalThreshold, metrics.optimal_threshold],
+                [t.model.featureSelection, t.model.borutaDomain],
+                [t.model.explainability, t.model.shapTreeExplainer],
+                [t.model.oversampling, 'SMOTE'],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5">
                   <span className={clsx('text-[0.6rem]', textMuted)}>{k}:</span>
@@ -206,7 +206,7 @@ export default function Model() {
       {/* ── Source footnote ────────────────────────── */}
       <motion.div {...fadeUp(0.50)}>
         <p className={clsx('text-center text-[0.6rem] italic', textMuted)}>
-          {t.modelPage.source}
+          {t.model.methodologySource}
         </p>
       </motion.div>
     </div>

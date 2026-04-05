@@ -10,6 +10,7 @@ import Segments    from './pages/Segments'
 import Diagnostics from './pages/Diagnostics'
 import Model       from './pages/Model'
 import StrategyLab from './pages/StrategyLab'
+import TaskDetail  from './pages/TaskDetail'
 import { clsx } from 'clsx'
 
 const pages = {
@@ -18,12 +19,19 @@ const pages = {
   diagnostics: Diagnostics,
   model:       Model,
   strategyLab: StrategyLab,
+  taskDetail:  TaskDetail,
 }
 
 function AppShell() {
   const [activePage, setActivePage] = useState('overview')
+  const [activeTaskId, setActiveTaskId] = useState(null)
   const { isDark } = useTheme()
   const Page = pages[activePage] || Overview
+
+  const navigate = (page, taskId = null) => {
+    setActivePage(page)
+    setActiveTaskId(taskId)
+  }
 
   return (
     <div className={clsx(
@@ -43,18 +51,18 @@ function AppShell() {
       )}
 
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar activePage={activePage} onNavigate={setActivePage} />
+        <Navbar activePage={activePage} onNavigate={navigate} />
 
         <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 md:px-6 lg:px-8 py-6 md:py-8">
           <AnimatePresence mode="wait">
             <motion.div
-              key={activePage}
+              key={activePage === 'taskDetail' ? `taskDetail-${activeTaskId}` : activePage}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.22, ease: 'easeInOut' }}
             >
-              <Page />
+              <Page onNavigate={navigate} activeTaskId={activeTaskId} />
             </motion.div>
           </AnimatePresence>
         </main>

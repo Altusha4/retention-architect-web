@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -61,16 +62,16 @@ function ShapTooltip({ active, payload }) {
       <p className="font-bold mb-1.5" style={{ color }}>{d?.name}</p>
       <div className="space-y-0.5">
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          {t.shap.featureValue} <span className="font-bold" style={{ color }}>{d?.value}</span>
+          {t.shap.featureValue}: <span className="font-bold" style={{ color }}>{d?.value}</span>
         </p>
         <p className={isDark ? 'text-white/60' : 'text-black/60'}>
-          {t.shap.shapContrib}{' '}
+          {t.shap.shapContribution}:{' '}
           <span className="font-bold" style={{ color }}>
             {(d?.contribution ?? 0) >= 0 ? '+' : ''}{(d?.contribution ?? 0).toFixed(3)}
           </span>
         </p>
         <p className="text-[0.55rem] opacity-50 mt-1">
-          {isPos ? t.shap.tooltipIncrease : t.shap.tooltipReduce}
+          {isPos ? t.shap.increasesTooltip : t.shap.reducesTooltip}
         </p>
       </div>
     </div>
@@ -110,6 +111,7 @@ export default function ShapWaterfall({
 }) {
   const { t } = useI18n()
   const { isDark } = useTheme()
+  const { t } = useI18n()
   const accent    = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'
@@ -150,8 +152,8 @@ export default function ShapWaterfall({
         <div>
           <h3 className={clsx('text-sm font-black', textMain)}>{t.shap.title}</h3>
           <p className={clsx('text-[0.6rem] mt-0.5', textMuted)}>
-            {userId != null ? t.shap.userPrefix.replace('{id}', userId) : ''}
-            {t.shap.subtitle.replace('{base}', src.baseValue.toFixed(3)).replace('{pred}', src.outputValue.toFixed(3))}
+            {userId != null ? `User #${userId} · ` : ''}
+            {t.shap.base}: {src.baseValue.toFixed(3)} → {t.shap.prediction}: {src.outputValue.toFixed(3)}
           </p>
         </div>
         <div className="flex items-center gap-3 text-[0.58rem]">
@@ -242,7 +244,7 @@ export default function ShapWaterfall({
               <span className="font-black" style={{ color: '#ff0055' }}>{src.outputValue.toFixed(3)}</span>
             </div>
             <p className={clsx('text-[0.55rem] ml-auto italic', textMuted)}>
-              {t.shap.method}
+              {t.shap.source}
             </p>
           </div>
         </>

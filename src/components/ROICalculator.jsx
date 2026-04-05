@@ -13,6 +13,7 @@ import {
 import { DollarSign, TrendingUp, AlertTriangle, Zap } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -142,9 +143,9 @@ export default function ROICalculator() {
   const fmtN = v => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(v)
 
   const chartData = [
-    { name: 'Revenue at Risk',  value: calc.revenueAtRisk, fill: '#ff0055' },
-    { name: 'Recovered',        value: calc.recovered,     fill: accent },
-    { name: 'Lost to Churn',    value: calc.lost,          fill: '#ff8800' },
+    { name: t.roi.revenueAtRiskChart,  value: calc.revenueAtRisk, fill: '#ff0055' },
+    { name: t.roi.recoveredChart,       value: calc.recovered,     fill: accent },
+    { name: t.roi.lostToChurn,          value: calc.lost,          fill: '#ff8800' },
   ]
 
   return (
@@ -153,7 +154,7 @@ export default function ROICalculator() {
       <div className="mb-5">
         <h2 className={clsx('text-xl font-black', textMain)}>{t.roi.title}</h2>
         <p className={clsx('text-xs mt-0.5', textMuted)}>
-          {t.roi.subtitle}
+          {t.roi.formula}
         </p>
       </div>
 
@@ -170,7 +171,7 @@ export default function ROICalculator() {
             format={v => fmtN(v)} onChange={setTotalUsers} color={accent} isDark={isDark} />
           <SliderRow label={t.roi.churnRate} value={churnRate} min={5} max={40}
             format={v => `${v}%`} onChange={setChurnRate} color="#ff8800" isDark={isDark} />
-          <SliderRow label={t.roi.arpu} value={arpu} min={5} max={50}
+          <SliderRow label={t.roi.avgRevenue} value={arpu} min={5} max={50}
             format={v => `$${v}`} onChange={setArpu} color="#00e5ff" isDark={isDark} />
           <SliderRow label={t.roi.costRatio} value={costRatio} min={2} max={10}
             format={v => `${v}:1`} onChange={setCostRatio} color="#ff0055" isDark={isDark} />
@@ -191,10 +192,10 @@ export default function ROICalculator() {
         <div className="space-y-4">
           {/* Key metrics */}
           <div className="grid grid-cols-2 gap-3">
-            <MetricCard label={t.roi.revenueAtRisk}  value={fmt(calc.revenueAtRisk)} sub={t.roi.churningUsers.replace('{n}', fmtN(calc.churningUsers))} color="#ff0055" icon={AlertTriangle} isDark={isDark} />
-            <MetricCard label={t.roi.netSavings}     value={fmt(calc.netSavings)}    sub={t.roi.recoveryRate}   color={accent}    icon={TrendingUp}   isDark={isDark} />
-            <MetricCard label={t.roi.falseAlarmCost} value={fmt(calc.costFalseAlarms)} sub={t.roi.fpInterventions.replace('{n}', fmtN(calc.falseAlarms))} color="#ff8800" icon={DollarSign} isDark={isDark} />
-            <MetricCard label={t.roi.roiLabel}       value={`${calc.roi.toFixed(1)}×`}  sub={t.roi.netSavingsRatio} color="#00e5ff"  icon={Zap}          isDark={isDark} />
+            <MetricCard label={t.roi.revenueAtRisk}  value={fmt(calc.revenueAtRisk)} sub={`${fmtN(calc.churningUsers)} ${t.roi.churningUsers}`} color="#ff0055" icon={AlertTriangle} isDark={isDark} />
+            <MetricCard label={t.roi.netSavings}      value={fmt(calc.netSavings)}    sub={t.roi.recoveryRate}   color={accent}    icon={TrendingUp}   isDark={isDark} />
+            <MetricCard label={t.roi.falseAlarmCost} value={fmt(calc.costFalseAlarms)} sub={`${fmtN(calc.falseAlarms)} ${t.roi.fpInterventions}`} color="#ff8800" icon={DollarSign} isDark={isDark} />
+            <MetricCard label={t.roi.roiLabel}              value={`${calc.roi.toFixed(1)}×`}  sub={t.roi.netSavingsFpCost} color="#00e5ff"  icon={Zap}          isDark={isDark} />
           </div>
 
           {/* Bar chart */}
@@ -222,7 +223,7 @@ export default function ROICalculator() {
 
           {/* Source */}
           <p className={clsx('text-[0.52rem] italic', textMuted)}>
-            {t.roi.source}
+            {t.roi.roiSource}
           </p>
         </div>
       </div>

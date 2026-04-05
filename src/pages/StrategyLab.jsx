@@ -136,11 +136,11 @@ function StatTile({ label, value, color, isDark }) {
 // Grace period timeline visualiser
 function GraceTimeline({ t, isDark }) {
   const steps = [
-    { hour: '0h', label: isDark ? 'Payment Fails' : 'Payment Fails', icon: '⚠️', done: true },
-    { hour: '1h', label: 'Auto Retry #1', icon: '🔄', done: true },
-    { hour: '24h', label: 'CSM Notified', icon: '📬', done: true },
-    { hour: '48h', label: 'Auto Retry #2', icon: '🔄', done: false },
-    { hour: '72h', label: 'Grace Ends', icon: '⏰', done: false },
+    { hour: '0h', label: t.strategy.graceStep1, icon: '⚠️', done: true },
+    { hour: '1h', label: t.strategy.graceStep2, icon: '🔄', done: true },
+    { hour: '24h', label: t.strategy.graceStep3, icon: '📬', done: true },
+    { hour: '48h', label: t.strategy.graceStep4, icon: '🔄', done: false },
+    { hour: '72h', label: t.strategy.graceStep5, icon: '⏰', done: false },
   ]
   return (
     <div className="mt-5 relative">
@@ -227,13 +227,13 @@ function DunningGrid({ isDark }) {
 }
 
 // Educational funnel
-function EducationFunnel({ isDark }) {
+function EducationFunnel({ isDark, t }) {
   const steps = [
-    { label: 'Disengaged User Detected', pct: 100, color: '#ff0055' },
-    { label: 'Feature Discovery Email', pct: 68, color: '#ff8800' },
-    { label: 'In-App Tooltip Triggered', pct: 45, color: '#ccff00' },
-    { label: 'Power Feature Activated', pct: 29, color: '#00ccff' },
-    { label: 'Churn Risk Neutralised', pct: 18, color: '#8800ff' },
+    { label: t.strategy.funnelStep1, pct: 100, color: '#ff0055' },
+    { label: t.strategy.funnelStep2, pct: 68, color: '#ff8800' },
+    { label: t.strategy.funnelStep3, pct: 45, color: '#ccff00' },
+    { label: t.strategy.funnelStep4, pct: 29, color: '#00ccff' },
+    { label: t.strategy.funnelStep5, pct: 18, color: '#8800ff' },
   ]
   return (
     <div className="mt-5 space-y-2">
@@ -314,7 +314,7 @@ export default function StrategyLab() {
     if (approveApplied) return
     setApproveApplied(true)
     setStrategyToggles({ grace: true, dunning: true, education: true })
-    showToast('Retention protocols activated for 1,240 accounts.')
+    showToast(s.protocolsActivated)
   }
 
   function toggleWeek(i) {
@@ -366,7 +366,7 @@ export default function StrategyLab() {
         { label: s.card3Stat2Label, value: s.card3Stat2Val },
         { label: s.card3Stat3Label, value: s.card3Stat3Val },
       ],
-      visual: (isDark) => <EducationFunnel isDark={isDark} />,
+      visual: (isDark) => <EducationFunnel isDark={isDark} t={t} />,
     },
   ]
 
@@ -445,7 +445,7 @@ export default function StrategyLab() {
                         style={{ background: 'rgba(204,255,0,0.08)', border: '1px solid rgba(204,255,0,0.22)', color: '#ccff00' }}
                       >
                         <Activity size={11} strokeWidth={3} className="animate-pulse" />
-                        Monitoring Live Payments
+                        {s.monitoringLive}
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -526,10 +526,10 @@ export default function StrategyLab() {
               {/* Live metric panel */}
               <div className="space-y-3">
                 {[
-                  { label: 'PM Actions Logged',       value: '1,284',  color: '#ccff00', pct: 82 },
-                  { label: 'Model Re-weights',         value: '47',     color: '#00ccff', pct: 61 },
-                  { label: 'Confidence Score Avg',     value: '0.87',   color: '#ff8800', pct: 87 },
-                  { label: 'Recommendation Accuracy',  value: '91.7%',  color: '#ccff00', pct: 92 },
+                  { label: s.pmActionsLogged,  value: '1,284',  color: '#ccff00', pct: 82 },
+                  { label: s.modelReweights,   value: '47',     color: '#00ccff', pct: 61 },
+                  { label: s.confidenceAvg,    value: '0.87',   color: '#ff8800', pct: 87 },
+                  { label: s.recAccuracy,      value: '91.7%',  color: '#ccff00', pct: 92 },
                 ].map((metric, i) => (
                   <motion.div key={metric.label}
                     initial={{ opacity: 0, x: 20 }}
@@ -567,7 +567,7 @@ export default function StrategyLab() {
                   className="btn-lime w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm mt-1"
                 >
                   <Zap size={14} strokeWidth={3} />
-                  Trigger Manual Re-train
+                  {s.triggerRetrain}
                 </motion.button>
               </div>
             </div>
@@ -640,7 +640,7 @@ export default function StrategyLab() {
                 <div className="mt-auto pt-3 border-t"
                   style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    {['Raw Data', '→', 'PII Strip', '→', 'Masked Features', '→', 'AI Model'].map((item, i) => (
+                    {[s.rawData, '→', s.piiStrip, '→', s.maskedFeatures, '→', s.aiModel].map((item, i) => (
                       <span key={i} className={clsx(
                         'text-[0.5rem] font-bold px-1.5 py-0.5 rounded',
                         item === '→'
@@ -692,11 +692,11 @@ export default function StrategyLab() {
                   style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                   <div className="flex flex-col gap-1.5">
                     {[
-                      { label: 'React Frontend', color: '#00ccff' },
-                      { label: '↓ POST /ai/consult', color: isDark ? '#555' : '#aaa' },
-                      { label: 'FastAPI Gateway (anonymize)', color: '#22c55e' },
-                      { label: '↓ Sanitized payload only', color: isDark ? '#555' : '#aaa' },
-                      { label: 'OpenAI API', color: '#ff8800' },
+                      { label: s.reactFrontend, color: '#00ccff' },
+                      { label: s.postConsult, color: isDark ? '#555' : '#aaa' },
+                      { label: s.fastapiGateway, color: '#22c55e' },
+                      { label: s.sanitizedPayload, color: isDark ? '#555' : '#aaa' },
+                      { label: s.openaiApi, color: '#ff8800' },
                     ].map((row, i) => (
                       <span key={i} className="text-[0.5rem] font-mono font-bold px-2 py-0.5 rounded"
                         style={{
@@ -737,7 +737,7 @@ export default function StrategyLab() {
                 <div className="mt-auto pt-3 border-t"
                   style={{ borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }}>
                   <p className={clsx('text-[0.5rem] font-bold mb-1.5 uppercase tracking-widest', textMuted)}>
-                    Model inputs (anonymized only)
+                    {s.modelInputsLabel}
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {['session_days', 'payment_attempts', 'feature_usage_ratio', 'plan_tier', 'ltv_band', 'cohort_age'].map(f => (
@@ -778,15 +778,15 @@ export default function StrategyLab() {
                 <div className="flex items-center gap-2 mb-2">
                   <Zap size={16} style={{ color: '#ccff00' }} />
                   <span className="text-[0.6rem] font-bold tracking-[0.2em] uppercase" style={{ color: '#ccff00' }}>
-                    Implementation Timeline
+                    {s.implTimeline}
                   </span>
                 </div>
                 <h3 className={clsx('text-2xl md:text-3xl font-black leading-tight', textMain)}>
-                  Full deployment in{' '}
-                  <span style={{ color: '#ccff00', textShadow: '0 0 14px rgba(204,255,0,0.4)' }}>14 days</span>
+                  {s.fullDeployIn}{' '}
+                  <span style={{ color: '#ccff00', textShadow: '0 0 14px rgba(204,255,0,0.4)' }}>{s.fourteenDays}</span>
                 </h3>
                 <p className={clsx('text-xs mt-1', textMuted)}>
-                  Grace periods + Dunning active in week 1. Educational sequences live week 2.
+                  {s.implSub}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
@@ -800,8 +800,8 @@ export default function StrategyLab() {
                     : { background: '#ccff00', color: '#000' }}
                 >
                   {approveApplied
-                    ? <><CheckCheck size={13} strokeWidth={3} /> Applied</>
-                    : <><Zap size={13} strokeWidth={3} /> Approve All Strategies</>
+                    ? <><CheckCheck size={13} strokeWidth={3} /> {s.applied}</>
+                    : <><Zap size={13} strokeWidth={3} /> {s.approveAll}</>
                   }
                 </motion.button>
 
@@ -815,7 +815,7 @@ export default function StrategyLab() {
                   )}
                 >
                   <Download size={13} />
-                  Export Report
+                  {s.exportReport}
                 </motion.button>
               </div>
             </div>
@@ -823,8 +823,8 @@ export default function StrategyLab() {
             {/* Week 1 / Week 2 timeline blocks */}
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               {[
-                { label: 'Week 1', desc: 'Grace Period + Smart Dunning', tasks: ['Deploy grace period logic', 'Configure retry schedules', 'Enable CSM alerts'] },
-                { label: 'Week 2', desc: 'Educational Retention Sequences', tasks: ['Launch feature discovery emails', 'Activate in-app tooltips', 'Go live — full monitoring'] },
+                { label: s.week1, desc: s.week1Desc, tasks: [s.week1Task1, s.week1Task2, s.week1Task3] },
+                { label: s.week2, desc: s.week2Desc, tasks: [s.week2Task1, s.week2Task2, s.week2Task3] },
               ].map((week, i) => (
                 <motion.button
                   key={i}

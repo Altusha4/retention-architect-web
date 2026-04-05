@@ -3,6 +3,7 @@ import HeroStats from './HeroStats'
 import ActivityChart from './ActivityChart'
 import TechFailureChart from './TechFailureChart'
 import { ArrowRight, Zap, TrendingUp } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 
 const recentAlerts = [
   { id: 'USR-001', name: 'Aisha Bekova',        event: 'Payment retry failed (3rd attempt)',   severity: 'critical', time: '2m ago' },
@@ -18,6 +19,7 @@ const sevStyle = {
 }
 
 export default function Dashboard() {
+  const { t } = useI18n()
   return (
     <div className="space-y-6 md:space-y-8">
 
@@ -29,13 +31,7 @@ export default function Dashboard() {
             animate={{ opacity: 1, x: 0 }}
             className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight"
           >
-            Diagnostic{' '}
-            <span
-              className="neon-lime"
-              style={{ color: '#ccff00' }}
-            >
-              Dashboard
-            </span>
+            {t.dashboard.title}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}
@@ -43,7 +39,7 @@ export default function Dashboard() {
             transition={{ delay: 0.1 }}
             className="text-white/35 mt-1 text-xs md:text-sm"
           >
-            Real-time churn intelligence &amp; retention signals
+            {t.dashboard.sub}
           </motion.p>
         </div>
 
@@ -62,7 +58,7 @@ export default function Dashboard() {
             className="w-1.5 h-1.5 rounded-full animate-pulse"
             style={{ background: '#ccff00', boxShadow: '0 0 5px #ccff00' }}
           />
-          LIVE · 3s ago
+          {t.dashboard.liveAgo}
         </motion.div>
       </div>
 
@@ -88,12 +84,12 @@ export default function Dashboard() {
       >
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-base md:text-lg font-bold text-white">Live Risk Alerts</h3>
-            <p className="text-[0.65rem] text-white/30 mt-0.5">Triggered by behavioural ML signals</p>
+            <h3 className="text-base md:text-lg font-bold text-white">{t.dashboard.liveAlerts}</h3>
+            <p className="text-[0.65rem] text-white/30 mt-0.5">{t.dashboard.alertsSub}</p>
           </div>
           <button className="flex items-center gap-1 text-xs font-semibold transition-colors hover:opacity-70"
             style={{ color: '#ccff00' }}>
-            View all <ArrowRight size={12} />
+            {t.dashboard.viewAll} <ArrowRight size={12} />
           </button>
         </div>
 
@@ -161,23 +157,23 @@ export default function Dashboard() {
                 className="text-[0.6rem] font-bold tracking-[0.18em] uppercase"
                 style={{ color: '#ccff00' }}
               >
-                Retention Potential
+                {t.dashboard.retentionPotential}
               </span>
             </div>
             <p className="text-lg md:text-xl font-black text-white leading-snug">
-              Recover up to{' '}
+              {t.dashboard.recoverUpTo}{' '}
               <span className="neon-lime" style={{ color: '#ccff00' }}>$2.4M ARR</span>
-              {' '}with automated interventions
+              {' '}{t.dashboard.withAutoInterventions}
             </p>
             <p className="text-[0.62rem] text-white/30 mt-1">
-              Based on historical conversion rates and risk model confidence scores
+              {t.dashboard.basedOnRates}
             </p>
           </div>
           <button
             className="btn-lime flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm whitespace-nowrap self-start sm:self-auto"
           >
             <Zap size={14} strokeWidth={3} />
-            Launch Campaign
+            {t.dashboard.launchCampaign}
           </button>
         </div>
       </motion.div>

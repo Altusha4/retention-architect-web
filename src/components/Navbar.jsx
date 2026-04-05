@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sun, Moon, Menu, X, ChevronDown, Zap, Eye, Users, Activity, BarChart2, Layers } from 'lucide-react'
+import { Sun, Moon, Menu, X, ChevronDown, ChevronRight, ArrowLeft, Zap, Eye, Users, Activity, BarChart2, Layers } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { getAccent, accentFg, accentGlow, accentTextShadow } from '../lib/theme'
@@ -27,7 +27,7 @@ export default function Navbar({ activePage, onNavigate }) {
   const label = (key) => t.nav[key] || key
 
   const navBtn = (cfg) => {
-    const active = activePage === cfg.key
+    const active = activePage === cfg.key || (cfg.key === 'overview' && activePage === 'taskDetail')
     const Icon   = cfg.icon
     return (
       <button
@@ -180,6 +180,31 @@ export default function Navbar({ activePage, onNavigate }) {
           {PAGE_CONFIG.map(cfg => navBtn(cfg))}
         </nav>
 
+        {/* ── Breadcrumb for task detail ── */}
+        {activePage === 'taskDetail' && (
+          <div className={clsx(
+            'border-t',
+            isDark ? 'border-white/[0.04]' : 'border-black/[0.04]',
+          )}>
+            <div className="max-w-screen-xl mx-auto px-4 md:px-6 flex items-center gap-2 py-2 text-xs">
+              <button
+                onClick={() => onNavigate('overview')}
+                className={clsx(
+                  'flex items-center gap-1 font-semibold transition-colors',
+                  isDark ? 'text-white/40 hover:text-white' : 'text-black/40 hover:text-black',
+                )}
+              >
+                <ArrowLeft size={12} />
+                {t.nav.overview}
+              </button>
+              <ChevronRight size={12} className={isDark ? 'text-white/20' : 'text-black/20'} />
+              <span style={{ color: accent }} className="font-bold">
+                {t.taskDetail?.breadcrumb || 'Task Details'}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* ── Mobile dropdown ── */}
         <AnimatePresence>
           {mobileOpen && (
@@ -200,11 +225,11 @@ export default function Navbar({ activePage, onNavigate }) {
                       onClick={() => { onNavigate(cfg.key); setMobileOpen(false) }}
                       className={clsx(
                         'w-full text-left flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all',
-                        activePage === cfg.key
+                        (activePage === cfg.key || (cfg.key === 'overview' && activePage === 'taskDetail'))
                           ? 'text-black'
                           : isDark ? 'text-white/50' : 'text-black/50',
                       )}
-                      style={activePage === cfg.key ? { background: accent, color: fg } : {}}
+                      style={(activePage === cfg.key || (cfg.key === 'overview' && activePage === 'taskDetail')) ? { background: accent, color: fg } : {}}
                     >
                       <Icon size={15} strokeWidth={2} />
                       {label(cfg.key)}
@@ -238,8 +263,8 @@ export default function Navbar({ activePage, onNavigate }) {
         </AnimatePresence>
       </header>
 
-      {/* Height offset — taller on md because of the second nav row */}
-      <div className="h-[65px] md:h-[105px] lg:h-[65px]" />
+      {/* Height offset — taller on md because of the second nav row, even taller with breadcrumb */}
+      <div className={activePage === 'taskDetail' ? 'h-[97px] md:h-[137px] lg:h-[97px]' : 'h-[65px] md:h-[105px] lg:h-[65px]'} />
     </>
   )
 }

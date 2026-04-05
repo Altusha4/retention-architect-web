@@ -85,7 +85,7 @@ function Message({ msg, t, isDark }) {
                 className="text-[0.58rem] font-bold px-2 py-1 rounded-lg transition-colors"
                 style={{ background: accentAlpha(isDark, 0.15), color: accent, border: `1px solid ${accentAlpha(isDark, 0.25)}` }}
               >
-                Ask about this ›
+                {t.ai.askAbout}
               </button>
             </div>
           )}
@@ -110,7 +110,7 @@ function Message({ msg, t, isDark }) {
               }}
             >
               <Zap size={10} strokeWidth={3} />
-              {execDone ? '✓ Executed' : t.ai.executeStrategy}
+              {execDone ? t.ai.executed : t.ai.executeStrategy}
             </button>
             <button
               onClick={handleReport}
@@ -125,7 +125,7 @@ function Message({ msg, t, isDark }) {
                 border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
               }}
             >
-              {reportDone ? '✓ Sent' : t.ai.sendReport}
+              {reportDone ? t.ai.sent : t.ai.sendReport}
             </button>
           </div>
         )}
@@ -136,7 +136,7 @@ function Message({ msg, t, isDark }) {
             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded"
               style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)' }}>
               <ShieldCheck size={8} style={{ color: '#22c55e' }} />
-              <span className="text-[0.46rem] font-bold" style={{ color: '#22c55e' }}>Anonymized</span>
+              <span className="text-[0.46rem] font-bold" style={{ color: '#22c55e' }}>{t.ai.anonymizedBadge}</span>
             </div>
           )}
           <span className={clsx('text-[0.52rem] px-1', isDark ? 'text-white/20' : 'text-black/25')}>
@@ -160,6 +160,7 @@ export default function WinsAI() {
   const [thinking, setThinking] = useState(false)
   const [msgIdx, setMsgIdx] = useState(0)
   const [messages, setMessages] = useState([])
+  const [fabHovered, setFabHovered] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -253,11 +254,17 @@ export default function WinsAI() {
             exit={{ scale: 0, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 320, damping: 24 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-black shadow-2xl"
+            onMouseEnter={() => setFabHovered(true)}
+            onMouseLeave={() => setFabHovered(false)}
+            className="fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-2xl text-sm font-black shadow-2xl overflow-hidden"
             style={{
               background: accent,
               color: fg,
               boxShadow: `${accentGlow(isDark, 'lg')}, 0 4px 24px rgba(0,0,0,0.4)`,
+              width: fabHovered ? 'auto' : '48px',
+              height: '48px',
+              padding: fabHovered ? '0 16px' : '0',
+              transition: 'width 0.25s ease, padding 0.25s ease',
             }}
             aria-label={t.ai.open}
           >
@@ -267,7 +274,15 @@ export default function WinsAI() {
                 style={{ background: accentAlpha(isDark, 0.4) }} />
               <Zap size={16} strokeWidth={3} className="relative" />
             </span>
-            {t.ai.title}
+            {fabHovered && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                className="ml-2.5 whitespace-nowrap"
+              >
+                {t.ai.title}
+              </motion.span>
+            )}
           </motion.button>
         )}
       </AnimatePresence>
@@ -312,7 +327,7 @@ export default function WinsAI() {
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse"
                   style={{ background: accent, boxShadow: `0 0 4px ${accent}` }} />
-                <span className="text-[0.52rem] font-bold" style={{ color: accent }}>LIVE</span>
+                <span className="text-[0.52rem] font-bold" style={{ color: accent }}>{t.ai.live}</span>
               </div>
 
               {/* Secure Shield badge */}
@@ -401,9 +416,9 @@ export default function WinsAI() {
                 {/* Quick Command Pills */}
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   {[
-                    'Analyze User #3 churn risk',
-                    'Show grace period impact',
-                    'Top recovery actions',
+                    t.ai.quickCmd1,
+                    t.ai.quickCmd2,
+                    t.ai.quickCmd3,
                   ].map((cmd) => (
                     <button
                       key={cmd}

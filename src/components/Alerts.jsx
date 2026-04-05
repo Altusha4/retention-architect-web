@@ -1,25 +1,28 @@
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bell, Zap } from 'lucide-react'
-
-const alerts = [
-  { id: 'USR-001', name: 'Aisha Bekova',         event: 'Payment retry failed (3rd attempt)',        severity: 'CRITICAL', color: '#ff0055', time: '2m ago',  action: 'Call CSM'         },
-  { id: 'USR-447', name: 'Temirkhan Abdi',       event: 'Session frequency dropped 70% in 7 days',  severity: 'HIGH',     color: '#ff4400', time: '14m ago', action: 'Re-engage email'  },
-  { id: 'USR-883', name: 'Lila Ospanova',        event: 'Visited cancellation page twice this week', severity: 'HIGH',     color: '#ff4400', time: '31m ago', action: 'Retention offer'  },
-  { id: 'USR-219', name: 'Nurzhan Bekmukhanov',  event: 'Downgrade intent signal detected',          severity: 'MODERATE', color: '#ff8800', time: '1h ago',  action: 'Value email'      },
-  { id: 'USR-562', name: 'Daniya Seitkali',      event: 'Feature adoption stalled at step 2',        severity: 'MODERATE', color: '#ff8800', time: '2h ago',  action: 'Onboarding nudge' },
-  { id: 'USR-731', name: 'Arman Dosov',          event: 'Trial expiring in 48h — no purchase intent',severity: 'LOW',      color: '#ffcc00', time: '3h ago',  action: 'Extend trial'     },
-]
+import { useI18n } from '../context/I18nContext'
 
 export default function Alerts() {
+  const { t } = useI18n()
+
+  const alerts = [
+    { id: 'USR-001', name: 'Aisha Bekova',         event: t.alerts.event1, severity: 'CRITICAL', color: '#ff0055', time: '2m ago',  action: t.alerts.action1 },
+    { id: 'USR-447', name: 'Temirkhan Abdi',       event: t.alerts.event2, severity: 'HIGH',     color: '#ff4400', time: '14m ago', action: t.alerts.action2 },
+    { id: 'USR-883', name: 'Lila Ospanova',        event: t.alerts.event3, severity: 'HIGH',     color: '#ff4400', time: '31m ago', action: t.alerts.action3 },
+    { id: 'USR-219', name: 'Nurzhan Bekmukhanov',  event: t.alerts.event4, severity: 'MODERATE', color: '#ff8800', time: '1h ago',  action: t.alerts.action4 },
+    { id: 'USR-562', name: 'Daniya Seitkali',      event: t.alerts.event5, severity: 'MODERATE', color: '#ff8800', time: '2h ago',  action: t.alerts.action5 },
+    { id: 'USR-731', name: 'Arman Dosov',          event: t.alerts.event6, severity: 'LOW',      color: '#ffcc00', time: '3h ago',  action: t.alerts.action6 },
+  ]
+
   return (
     <div className="space-y-5 md:space-y-8">
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white">Risk Alerts</h2>
+          <h2 className="text-2xl sm:text-3xl font-black text-white">{t.alerts.title}</h2>
           <p className="text-white/35 mt-1 text-xs md:text-sm">
-            ML-triggered behavioural anomalies requiring action
+            {t.alerts.sub}
           </p>
         </div>
         <div
@@ -31,7 +34,7 @@ export default function Alerts() {
           }}
         >
           <Bell size={13} />
-          {alerts.length} Active
+          {alerts.length} {t.alerts.active}
         </div>
       </div>
 

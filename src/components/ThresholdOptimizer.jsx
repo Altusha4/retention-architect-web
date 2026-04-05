@@ -13,6 +13,7 @@ import {
 import { Zap } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
+import { useI18n } from '../context/I18nContext'
 import { getAccent } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -52,7 +53,7 @@ function PRTooltip({ active, payload, label }) {
         border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)',
       }}>
       <p className={clsx('font-bold mb-1', isDark ? 'text-white/60' : 'text-black/60')}>
-        {t.threshold.thresholdLabel}: {Number(label).toFixed(2)}
+        {t.threshold.threshold + ':'} {Number(label).toFixed(2)}
       </p>
       {payload.map(p => (
         <div key={p.name} className="flex items-center gap-2">
@@ -97,7 +98,7 @@ export default function ThresholdOptimizer() {
       <div className="mb-5">
         <h2 className={clsx('text-xl font-black', textMain)}>{t.threshold.title}</h2>
         <p className={clsx('text-xs mt-0.5', textMuted)}>
-          {t.threshold.subtitle}
+          {t.threshold.sub}
         </p>
       </div>
 
@@ -143,7 +144,7 @@ export default function ThresholdOptimizer() {
                 stroke="#ffcc00"
                 strokeDasharray="5 3"
                 strokeWidth={1.5}
-                label={{ value: '★ Optimal', position: 'insideTopLeft', fill: '#ffcc00', fontSize: 10, fontWeight: 700 }}
+                label={{ value: t.threshold.optimal, position: 'insideTopLeft', fill: '#ffcc00', fontSize: 10, fontWeight: 700 }}
               />
 
               {/* Current threshold line (skip if same as optimal) */}
@@ -153,7 +154,7 @@ export default function ThresholdOptimizer() {
                   stroke={accent}
                   strokeDasharray="4 3"
                   strokeWidth={1.5}
-                  label={{ value: '◆ Selected', position: 'insideTopRight', fill: accent, fontSize: 10, fontWeight: 700 }}
+                  label={{ value: t.threshold.selected, position: 'insideTopRight', fill: accent, fontSize: 10, fontWeight: 700 }}
                 />
               )}
 
@@ -210,11 +211,11 @@ export default function ThresholdOptimizer() {
         {/* Slider */}
         <div className="px-5 pb-4">
           <div className="flex items-center justify-between mb-2">
-            <span className={clsx('text-[0.65rem] font-semibold', textMuted)}>{t.threshold.sliderLabel}</span>
+            <span className={clsx('text-[0.65rem] font-semibold', textMuted)}>{t.threshold.classificationThreshold}</span>
             <span className="text-lg font-black" style={{ color: isOptimal ? '#ffcc00' : accent }}>
               {threshold.toFixed(2)}
               {isOptimal && (
-                <span className="ml-1.5 text-[0.6rem] font-bold" style={{ color: '#ffcc00' }}>{t.threshold.optimal}</span>
+                <span className="ml-1.5 text-[0.6rem] font-bold" style={{ color: '#ffcc00' }}>{t.threshold.optimalLabel}</span>
               )}
             </span>
           </div>
@@ -260,10 +261,10 @@ export default function ThresholdOptimizer() {
         <div className="px-5 pb-5">
           <div className="grid grid-cols-4 gap-2">
             {[
-              { label: t.threshold.precision,    value: current?.precision.toFixed(3), color: '#00e5ff' },
-              { label: t.threshold.recall,       value: current?.recall.toFixed(3),    color: '#ff0055' },
-              { label: t.threshold.f1Score,      value: current?.f1.toFixed(3),        color: accent    },
-              { label: t.threshold.optimalLabel, value: OPTIMAL_THRESHOLD.toFixed(3),  color: '#ffcc00' },
+              { label: t.threshold.precision, value: current?.precision.toFixed(3), color: '#00e5ff' },
+              { label: t.threshold.recall,    value: current?.recall.toFixed(3),    color: '#ff0055' },
+              { label: t.threshold.f1Score,   value: current?.f1.toFixed(3),        color: accent    },
+              { label: t.threshold.optimalStar, value: OPTIMAL_THRESHOLD.toFixed(3),  color: '#ffcc00' },
             ].map(m => (
               <div key={m.label} className="text-center rounded-xl py-2.5"
                 style={{ background: `${m.color}0a`, border: `1px solid ${m.color}20` }}>
@@ -280,11 +281,10 @@ export default function ThresholdOptimizer() {
             style={{ background: 'rgba(255,204,0,0.06)', border: '1px solid rgba(255,204,0,0.2)' }}>
             <Zap size={12} style={{ color: '#ffcc00', flexShrink: 0, marginTop: 1 }} />
             <p className={clsx('text-[0.6rem] leading-relaxed', textMuted)}>
-              {t.threshold.callout
-                .replace('{val}', OPTIMAL_THRESHOLD)
-                .replace('{p}', optimal.precision.toFixed(3))
-                .replace('{r}', optimal.recall.toFixed(3))
-                .replace('{f1}', optimal.f1.toFixed(3))}
+              <span className="font-bold" style={{ color: '#ffcc00' }}>
+                {t.threshold.optimalThreshold + ': ' + OPTIMAL_THRESHOLD}
+              </span>{' '}
+              — {t.threshold.callout}
             </p>
           </div>
         </div>

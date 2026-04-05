@@ -11,16 +11,18 @@ import {
   X,
 } from 'lucide-react'
 import { clsx } from 'clsx'
+import { useI18n } from '../context/I18nContext'
 
 const navItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'search',    label: 'Deep Scan',  icon: Search },
-  { id: 'analytics', label: 'Analytics',  icon: BarChart3 },
-  { id: 'alerts',    label: 'Risk Alerts',icon: AlertTriangle },
-  { id: 'settings',  label: 'Settings',   icon: Settings },
+  { id: 'dashboard', labelKey: 'dashboard', icon: LayoutDashboard },
+  { id: 'search',    labelKey: 'deepScan',  icon: Search },
+  { id: 'analytics', labelKey: 'analyticsNav',  icon: BarChart3 },
+  { id: 'alerts',    labelKey: 'riskAlerts',icon: AlertTriangle },
+  { id: 'settings',  labelKey: 'settings',   icon: Settings },
 ]
 
 export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, isMobile }) {
+  const { t } = useI18n()
   const ref = useRef(null)
 
   // Close on outside click (mobile overlay)
@@ -83,16 +85,16 @@ export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, 
                 className="text-xl font-black tracking-tight leading-none neon-lime"
                 style={{ color: '#ccff00', letterSpacing: '-0.02em' }}
               >
-                Wins
+                {t.sidebar.wins}
               </p>
               <p className="text-[0.6rem] font-semibold tracking-[0.18em] text-white/40 uppercase mt-0.5">
-                Retention Engine
+                {t.sidebar.retentionEngine}
               </p>
               <span
                 className="inline-block mt-1.5 text-[0.52rem] px-2 py-0.5 rounded-full border font-mono font-bold tracking-widest"
                 style={{ borderColor: 'rgba(204,255,0,0.35)', color: 'rgba(204,255,0,0.7)' }}
               >
-                HackNU 2026
+                {t.sidebar.hacknu}
               </span>
             </motion.div>
           )}
@@ -139,7 +141,7 @@ export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, 
                       transition={{ duration: 0.18 }}
                       className="text-sm font-medium flex-1 text-left whitespace-nowrap"
                     >
-                      {item.label}
+                      {t.sidebar[item.labelKey]}
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -150,7 +152,7 @@ export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, 
 
               {/* Icon-only tooltip */}
               {isCollapsed && (
-                <span className="tooltip">{item.label}</span>
+                <span className="tooltip">{t.sidebar[item.labelKey]}</span>
               )}
             </div>
           )
@@ -183,11 +185,11 @@ export default function Sidebar({ activeView, onNavigate, isCollapsed, onClose, 
                 style={{ background: '#ccff00', boxShadow: '0 0 6px #ccff00' }}
               />
               <span className="text-[0.62rem] font-bold tracking-[0.14em] text-white/70 uppercase">
-                System Online
+                {t.sidebar.systemOnline}
               </span>
             </div>
             <div className="space-y-1">
-              {[['Engine', 'v2.4.1'], ['Models', '7 active'], ['Uptime', '99.98%']].map(([k, v]) => (
+              {[[t.sidebar.engine, 'v2.4.1'], [t.sidebar.models, '7 active'], [t.sidebar.uptime, '99.98%']].map(([k, v]) => (
                 <div key={k} className="flex justify-between">
                   <span className="text-[0.65rem] text-white/30">{k}</span>
                   <span className="text-[0.65rem] font-mono font-semibold" style={{ color: '#ccff00' }}>{v}</span>
