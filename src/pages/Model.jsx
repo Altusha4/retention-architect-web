@@ -91,6 +91,7 @@ const DEFAULT_METRICS = {
 }
 
 export default function Model() {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const accent    = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
@@ -103,12 +104,12 @@ export default function Model() {
   }, [])
 
   const metricCards = [
-    { label: 'Accuracy',    value: (metrics.accuracy * 100).toFixed(1) + '%', sub: 'Overall classification accuracy',   color: '#ccff00', icon: Target,   bar: Math.round(metrics.accuracy * 100) },
-    { label: 'Precision',   value: (metrics.precision * 100).toFixed(1) + '%', sub: 'True positive precision',          color: '#00e5ff', icon: TrendingUp, bar: Math.round(metrics.precision * 100) },
-    { label: 'Recall',      value: (metrics.recall * 100).toFixed(1) + '%', sub: 'Churn detection rate',                color: '#ff8800', icon: Activity,  bar: Math.round(metrics.recall * 100) },
-    { label: 'F1 Score',    value: metrics.f1_score.toFixed(3), sub: 'Harmonic mean P×R',                               color: '#ccff00', icon: Zap,       bar: Math.round(metrics.f1_score * 100) },
-    { label: 'AUC-ROC',     value: metrics.auc_roc.toFixed(3), sub: 'Binary classification curve',                     color: '#8800ff', icon: BarChart2, bar: Math.round(metrics.auc_roc * 100) },
-    { label: 'Brier Score', value: metrics.brier_score.toFixed(3), sub: '↓ Lower is better · calibrated',              color: '#00e5ff', icon: Brain,     bar: null },
+    { label: t.modelPage.accuracy,   value: (metrics.accuracy * 100).toFixed(1) + '%', sub: t.modelPage.accuracySub,   color: '#ccff00', icon: Target,   bar: Math.round(metrics.accuracy * 100) },
+    { label: t.modelPage.precision,  value: (metrics.precision * 100).toFixed(1) + '%', sub: t.modelPage.precisionSub, color: '#00e5ff', icon: TrendingUp, bar: Math.round(metrics.precision * 100) },
+    { label: t.modelPage.recall,     value: (metrics.recall * 100).toFixed(1) + '%', sub: t.modelPage.recallSub,       color: '#ff8800', icon: Activity,  bar: Math.round(metrics.recall * 100) },
+    { label: t.modelPage.f1Score,    value: metrics.f1_score.toFixed(3), sub: t.modelPage.f1ScoreSub,                  color: '#ccff00', icon: Zap,       bar: Math.round(metrics.f1_score * 100) },
+    { label: t.modelPage.aucRoc,     value: metrics.auc_roc.toFixed(3), sub: t.modelPage.aucRocSub,                    color: '#8800ff', icon: BarChart2, bar: Math.round(metrics.auc_roc * 100) },
+    { label: t.modelPage.brierScore, value: metrics.brier_score.toFixed(3), sub: t.modelPage.brierScoreSub,            color: '#00e5ff', icon: Brain,     bar: null },
   ]
 
   return (
@@ -123,8 +124,8 @@ export default function Model() {
           </div>
           <div>
             <h1 className={clsx('text-3xl md:text-4xl font-black leading-tight', textMain)}>
-              Model{' '}
-              <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>Performance</span>
+              {t.modelPage.titleMain}{' '}
+              <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>{t.modelPage.titleAccent}</span>
             </h1>
             <p className={clsx('text-sm mt-1', textMuted)}>
               {metrics.model_type}
@@ -151,9 +152,9 @@ export default function Model() {
       {/* ── Model Metrics Grid ─────────────────────── */}
       <section>
         <motion.div {...fadeUp(0.06)} className="mb-4">
-          <h2 className={clsx('text-xl font-black', textMain)}>Performance Metrics</h2>
+          <h2 className={clsx('text-xl font-black', textMain)}>{t.modelPage.perfMetrics}</h2>
           <p className={clsx('text-xs mt-0.5', textMuted)}>
-            Evaluated on held-out test set · Optimal threshold: {metrics.optimal_threshold}
+            {t.modelPage.perfMetricsSub.replace('{threshold}', metrics.optimal_threshold)}
           </p>
         </motion.div>
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4">
@@ -169,14 +170,14 @@ export default function Model() {
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ background: accent, boxShadow: `0 0 5px ${accent}` }} />
                 <span className={clsx('text-xs font-semibold', textMain)}>
-                  Soft Voting Ensemble · XGBoost + LightGBM + GradientBoosting
+                  {t.modelPage.ensemble}
                 </span>
               </div>
               {[
-                ['Optimal threshold', metrics.optimal_threshold],
-                ['Feature selection', 'Boruta + domain expert'],
-                ['Explainability', 'SHAP TreeExplainer'],
-                ['Oversampling', 'SMOTE'],
+                [t.modelPage.optimalThreshold, metrics.optimal_threshold],
+                [t.modelPage.featureSelection, 'Boruta + domain expert'],
+                [t.modelPage.explainability,   'SHAP TreeExplainer'],
+                [t.modelPage.oversampling,     'SMOTE'],
               ].map(([k, v]) => (
                 <div key={k} className="flex items-center gap-1.5">
                   <span className={clsx('text-[0.6rem]', textMuted)}>{k}:</span>
@@ -205,8 +206,7 @@ export default function Model() {
       {/* ── Source footnote ────────────────────────── */}
       <motion.div {...fadeUp(0.50)}>
         <p className={clsx('text-center text-[0.6rem] italic', textMuted)}>
-          Methodology: El Attar &amp; El-Hajj, Frontiers in AI (2026) · doi:10.3389/frai.2026.1748799 ·
-          Asif et al., Results in Engineering (2025) · Kotan et al., PLOS ONE (2025)
+          {t.modelPage.source}
         </p>
       </motion.div>
     </div>

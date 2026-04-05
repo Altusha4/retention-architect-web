@@ -31,6 +31,7 @@ function Card({ children, className = '' }) {
 }
 
 export default function Segments() {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const accent    = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
@@ -47,11 +48,11 @@ export default function Segments() {
         </div>
         <div>
           <h1 className={clsx('text-3xl md:text-4xl font-black leading-tight', textMain)}>
-            User Risk{' '}
-            <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>Segmentation</span>
+            {t.segPage.titleMain}{' '}
+            <span style={{ color: accent, textShadow: accentTextShadow(isDark) }}>{t.segPage.titleAccent}</span>
           </h1>
           <p className={clsx('text-sm mt-1', textMuted)}>
-            Autoencoder + K-Means clustering (k=3) · Understanding WHO churns and WHY
+            {t.segPage.subtitle}
           </p>
         </div>
       </motion.div>
@@ -67,8 +68,8 @@ export default function Segments() {
       <motion.div {...fadeUp(0.16)} className="flex items-center gap-4">
         <div className="flex-1 h-px" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
         <div>
-          <p className={clsx('text-base font-black text-center', textMain)}>Retention Strategies by Churn Type</p>
-          <p className={clsx('text-xs text-center mt-0.5', textMuted)}>Different causes require different interventions</p>
+          <p className={clsx('text-base font-black text-center', textMain)}>{t.segPage.dividerTitle}</p>
+          <p className={clsx('text-xs text-center mt-0.5', textMuted)}>{t.segPage.dividerSub}</p>
         </div>
         <div className="flex-1 h-px" style={{ background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }} />
       </motion.div>

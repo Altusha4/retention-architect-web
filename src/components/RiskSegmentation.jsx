@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, Cell, LabelList,
 } from 'recharts'
 import { AlertTriangle, Activity, CheckCircle2, Users, Clock, DollarSign } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { clsx } from 'clsx'
 
@@ -27,10 +28,11 @@ const fadeUp = (delay = 0) => ({
 })
 
 // ── Cluster card ───────────────────────────────
-function ClusterCard({ cluster, delay, isDark }) {
+function ClusterCard({ cluster, delay, isDark, t }) {
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'
   const Icon = cluster.icon
+  const clusterLabel = (name) => ({ 'High-Risk': t.riskSeg.highRisk, 'Medium-Risk': t.riskSeg.medRisk, 'Low-Risk': t.riskSeg.lowRisk })[name] || name
 
   return (
     <motion.div {...fadeUp(delay)}>
@@ -52,20 +54,20 @@ function ClusterCard({ cluster, delay, isDark }) {
               {cluster.churnRate}%
             </div>
             <div className={clsx('text-[0.58rem] font-bold tracking-widest uppercase mt-0.5', textMuted)}>
-              churn rate
+              {t.riskSeg.churnRate}
             </div>
           </div>
         </div>
 
         {/* Name */}
-        <h3 className={clsx('text-base font-black mb-3', textMain)}>{cluster.name}</h3>
+        <h3 className={clsx('text-base font-black mb-3', textMain)}>{clusterLabel(cluster.name)}</h3>
 
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-2 mb-3">
           {[
-            { icon: Users,       label: 'Users',   value: cluster.users.toLocaleString() },
-            { icon: Clock,       label: 'Tenure',  value: cluster.avgTenure },
-            { icon: DollarSign,  label: 'ARPU',    value: cluster.avgSpend },
+            { icon: Users,       label: t.riskSeg.users,  value: cluster.users.toLocaleString() },
+            { icon: Clock,       label: t.riskSeg.tenure, value: cluster.avgTenure },
+            { icon: DollarSign,  label: t.riskSeg.arpu,   value: cluster.avgSpend },
           ].map(({ icon: StatIcon, label, value }) => (
             <div key={label} className="text-center rounded-xl py-2"
               style={{ background: `${cluster.color}0a`, border: `1px solid ${cluster.color}18` }}>
@@ -78,10 +80,10 @@ function ClusterCard({ cluster, delay, isDark }) {
 
         {/* Dominant churn type badge */}
         <div className="flex items-center gap-1.5">
-          <span className={clsx('text-[0.55rem] font-semibold', textMuted)}>Dominant churn:</span>
+          <span className={clsx('text-[0.55rem] font-semibold', textMuted)}>{t.riskSeg.dominantChurn}</span>
           <span className="text-[0.55rem] font-bold px-2 py-0.5 rounded-full"
             style={{ background: `${cluster.color}14`, color: cluster.color }}>
-            {cluster.dominantType}
+            {t.riskSeg[cluster.dominantType.toLowerCase()] ?? cluster.dominantType}
           </span>
         </div>
       </div>
@@ -113,6 +115,7 @@ function DistTooltip({ active, payload }) {
 
 // ── Main component ─────────────────────────────
 export default function RiskSegmentation({ clusters = null }) {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const data = clusters ?? MOCK_CLUSTERS
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
@@ -128,16 +131,16 @@ export default function RiskSegmentation({ clusters = null }) {
     <div>
       {/* Section header */}
       <motion.div {...fadeUp(0)} className="mb-5">
-        <h2 className={clsx('text-xl font-black', textMain)}>Risk Segmentation</h2>
+        <h2 className={clsx('text-xl font-black', textMain)}>{t.riskSeg.title}</h2>
         <p className={clsx('text-xs mt-0.5', textMuted)}>
-          Autoencoder + K-Means clustering (k=3) · {total.toLocaleString()} total subscribers
+          {t.riskSeg.subtitle.replace('{n}', total.toLocaleString())}
         </p>
       </motion.div>
 
       {/* 3 cluster cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
         {data.map((cluster, i) => (
-          <ClusterCard key={cluster.name} cluster={cluster} delay={0.08 + i * 0.09} isDark={isDark} />
+          <ClusterCard key={cluster.name} cluster={cluster} delay={0.08 + i * 0.09} isDark={isDark} t={t} />
         ))}
       </div>
 
@@ -149,7 +152,7 @@ export default function RiskSegmentation({ clusters = null }) {
             border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
           }}>
           <p className={clsx('text-[0.6rem] font-bold tracking-widest uppercase mb-3', textMuted)}>
-            User Distribution Across Clusters
+            {t.riskSeg.distribution}
           </p>
           <ResponsiveContainer width="100%" height={40}>
             <BarChart layout="vertical" data={distData} margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
@@ -182,7 +185,7 @@ export default function RiskSegmentation({ clusters = null }) {
               </div>
             ))}
             <span className={clsx('ml-auto text-[0.5rem] italic', textMuted)}>
-              Source: Autoencoder segmentation · El Attar & El-Hajj, Frontiers in AI 2026
+              {t.riskSeg.source}
             </span>
           </div>
         </div>
