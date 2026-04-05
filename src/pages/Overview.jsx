@@ -11,7 +11,7 @@ import {
 } from 'recharts'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
-import { fetchStats, fetchPredict } from '../services/api'
+import { fetchStats, fetchPredict, fetchChurnDrivers, fetchTechFailures } from '../services/api'
 import { exportTaskPdf } from '../lib/exportTaskPdf'
 import { clsx } from 'clsx'
 
@@ -73,14 +73,6 @@ const sevCfg = {
   healthy:  { color: '#ccff00', bg: 'rgba(204,255,0,0.08)', border: 'rgba(204,255,0,0.22)'  },
 }
 
-const PIE_RAW = [
-  { key: 'paymentFailed',  value: 8200, color: '#ccff00' },
-  { key: 'sessionTimeout', value: 4100, color: '#00ccff' },
-  { key: 'apiError',       value: 3300, color: '#ff8800' },
-  { key: 'authFailure',    value: 2400, color: '#ff0055' },
-  { key: 'networkDrop',    value: 1500, color: '#8800ff' },
-]
-const PIE_TOTAL = PIE_RAW.reduce((s, d) => s + d.value, 0)
 
 // ─── sub-components ────────────────────────────
 function Card({ children, className = '', glowColor, style = {} }) {
@@ -126,13 +118,14 @@ function PieTooltip({ active, payload }) {
   const { t } = useI18n()
   if (!active || !payload?.length) return null
   const e = payload[0].payload
+  const total = e.total || 1
   return (
     <div className={clsx('rounded-xl p-3', isDark ? 'bg-[#111]' : 'bg-white')}
       style={{ border: `1px solid ${e.color}44` }}>
       <p className="text-xs font-bold tracking-widest uppercase" style={{ color: e.color }}>{e.name}</p>
       <p className={clsx('text-xl font-black', isDark ? 'text-white' : 'text-black')}>{e.value.toLocaleString()}</p>
       <p className={clsx('text-xs', isDark ? 'text-white/30' : 'text-black/40')}>
-        {((e.value / PIE_TOTAL) * 100).toFixed(1)}% {t.common.ofFailuresShort}
+        {((e.value / total) * 100).toFixed(1)}% {t.common.ofFailuresShort}
       </p>
     </div>
   )
@@ -160,8 +153,6 @@ export default function Overview({ onNavigate }) {
   const { t } = useI18n()
   const { isDark } = useTheme()
 
-  const PIE_DATA = PIE_RAW.map(d => ({ ...d, name: t.techFailure[d.key] || d.key }))
-
   // Live stats from backend (with fallback to hardcoded values)
   const [stats, setStats] = useState({
     total_revenue_at_risk: 3_200_000,
@@ -169,9 +160,33 @@ export default function Overview({ onNavigate }) {
     total_churned_users: 22_500,
     engine_health_pct: 99.98,
   })
+  const [rawBars, setRawBars]     = useState([])
+  const [rawSlices, setRawSlices] = useState([])
+  const [pieTotal, setPieTotal]   = useState(0)
   useEffect(() => {
     fetchStats().then(data => setStats(data)).catch(() => {})
+    fetchChurnDrivers().then(data => setRawBars(data.drivers ?? [])).catch(() => {})
+    fetchTechFailures().then(data => {
+      setRawSlices(data.slices ?? [])
+      setPieTotal(data.total ?? 0)
+    }).catch(() => {})
   }, [])
+
+  // Labels now come from the backend verbatim — no client-side i18n mapping
+  // for dynamic data (per explicit design choice). Static chrome (headings,
+  // axis titles, etc.) still uses t.* translations below.
+  const barData = rawBars.map(b => ({
+    segment: b.label ?? b.key,
+    days:    b.score,
+    color:   b.color,
+  }))
+  const PIE_DATA = rawSlices.map(s => ({
+    key:   s.key,
+    name:  s.label ?? s.key,
+    value: s.count,
+    color: s.color,
+    total: pieTotal,
+  }))
 
   // PM tasks state
   const [tasks, setTasks] = useState([
@@ -251,15 +266,6 @@ export default function Overview({ onNavigate }) {
     }
     setScanning(false)
   }
-
-  // chart data — 3 real ML churn factors derived from demo_data.json
-  // Scores normalized 0-7: Failed Gens from gen_failed cohort, Frustration from at-risk cohort,
-  // Active Span from gen_completed health signal (higher = better retention)
-  const barData = [
-    { segment: t.charts.factorFailed,       days: 5.6, color: '#ff0055' },
-    { segment: t.charts.factorFrustration,  days: 4.2, color: '#ff8800' },
-    { segment: t.charts.factorActiveSpan,   days: 6.1, color: '#ccff00' },
-  ]
 
   const taskDefs = [
     { key: 1, title: t.tasks.task1Title, sub: t.tasks.task1Sub, tag: t.tasks.task1Tag, tagColor: '#ff0055', icon: CreditCard },
@@ -580,7 +586,7 @@ export default function Overview({ onNavigate }) {
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <span className={clsx('text-xl font-black', textMain)}>{PIE_TOTAL.toLocaleString()}</span>
+                  <span className={clsx('text-xl font-black', textMain)}>{pieTotal.toLocaleString()}</span>
                   <span className={clsx('text-[0.6rem]', textMuted)}>{t.common.total}</span>
                 </div>
               </div>

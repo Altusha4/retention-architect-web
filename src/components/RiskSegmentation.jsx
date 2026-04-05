@@ -12,7 +12,6 @@ import {
 import { AlertTriangle, Activity, CheckCircle2, Users, Clock, DollarSign } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
-import { useI18n } from '../context/I18nContext'
 import { clsx } from 'clsx'
 
 // ── Mock data ──────────────────────────────────
@@ -29,11 +28,12 @@ const fadeUp = (delay = 0) => ({
 })
 
 // ── Cluster card ───────────────────────────────
+// Cluster names and dominant-churn-type strings are dynamic data served by
+// /segments — rendered verbatim without client-side i18n translation.
 function ClusterCard({ cluster, delay, isDark, t }) {
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'
   const Icon = cluster.icon
-  const clusterLabel = { 'High-Risk': t.segments.highRisk, 'Medium-Risk': t.segments.mediumRisk, 'Low-Risk': t.segments.lowRisk }
 
   return (
     <motion.div {...fadeUp(delay)}>
@@ -61,7 +61,7 @@ function ClusterCard({ cluster, delay, isDark, t }) {
         </div>
 
         {/* Name */}
-        <h3 className={clsx('text-base font-black mb-3', textMain)}>{clusterLabel[cluster.name] || cluster.name}</h3>
+        <h3 className={clsx('text-base font-black mb-3', textMain)}>{cluster.name}</h3>
 
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-2 mb-3">
@@ -84,7 +84,7 @@ function ClusterCard({ cluster, delay, isDark, t }) {
           <span className={clsx('text-[0.55rem] font-semibold', textMuted)}>{t.segments.dominantChurn}</span>
           <span className="text-[0.55rem] font-bold px-2 py-0.5 rounded-full"
             style={{ background: `${cluster.color}14`, color: cluster.color }}>
-            {t.riskSeg[cluster.dominantType.toLowerCase()] ?? cluster.dominantType}
+            {cluster.dominantType}
           </span>
         </div>
       </div>
@@ -118,7 +118,6 @@ function DistTooltip({ active, payload }) {
 export default function RiskSegmentation({ clusters = null }) {
   const { t } = useI18n()
   const { isDark } = useTheme()
-  const { t } = useI18n()
   const data = clusters ?? MOCK_CLUSTERS
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'
@@ -167,7 +166,7 @@ export default function RiskSegmentation({ clusters = null }) {
                   <LabelList
                     dataKey={c.name}
                     position="insideLeft"
-                    formatter={v => v > 8 ? `${({'High-Risk': t.segments.highRisk, 'Medium-Risk': t.segments.mediumRisk, 'Low-Risk': t.segments.lowRisk}[c.name] || c.name).split(/[-\s]/)[0]} ${v.toFixed(0)}%` : ''}
+                    formatter={v => v > 8 ? `${c.name.split(/[-\s]/)[0]} ${v.toFixed(0)}%` : ''}
                     style={{ fill: c.name === 'Low-Risk' ? '#000' : '#fff', fontSize: 10, fontWeight: 700 }}
                   />
                 </Bar>
@@ -180,7 +179,7 @@ export default function RiskSegmentation({ clusters = null }) {
             {data.map(c => (
               <div key={c.name} className="flex items-center gap-1.5 text-[0.58rem]">
                 <span className="w-2.5 h-2.5 rounded-full" style={{ background: c.color }} />
-                <span className={textMuted}>{{'High-Risk': t.segments.highRisk, 'Medium-Risk': t.segments.mediumRisk, 'Low-Risk': t.segments.lowRisk}[c.name] || c.name}</span>
+                <span className={textMuted}>{c.name}</span>
                 <span className="font-bold" style={{ color: c.color }}>
                   {((c.users / total) * 100).toFixed(1)}%
                 </span>

@@ -11,7 +11,6 @@ import {
 } from 'recharts'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
-import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
 import { clsx } from 'clsx'
 
@@ -111,7 +110,6 @@ export default function ShapWaterfall({
 }) {
   const { t } = useI18n()
   const { isDark } = useTheme()
-  const { t } = useI18n()
   const accent    = getAccent(isDark)
   const textMuted = isDark ? 'text-white/40' : 'text-black/45'
   const textMain  = isDark ? 'text-white'    : 'text-black'

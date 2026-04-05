@@ -293,6 +293,101 @@ export async function fetchModelMetrics() {
   }
 }
 
+// ── Dashboard content endpoints ───────────────────────────────────
+// These back the formerly-hardcoded constants in Overview, Diagnostics,
+// Segments and StrategyLab. Each has a local mock fallback that mirrors
+// the legacy hardcoded values so the UI stays usable offline.
+
+const MOCK_CHURN_DRIVERS = {
+  drivers: [
+    { key: 'factor_failed',       label: 'Failed Generations', score: 5.6, color: '#ff0055' },
+    { key: 'factor_frustration',  label: 'Frustration Index',  score: 4.2, color: '#ff8800' },
+    { key: 'factor_active_span',  label: 'Active Span',        score: 6.1, color: '#ccff00' },
+  ],
+  scale_max: 7,
+  _mock: true,
+}
+
+export async function fetchChurnDrivers() {
+  try {
+    const res = await fetchWithTimeout(`${BASE_URL}/analytics/churn-drivers`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch {
+    console.warn('[api] Backend unavailable — using mock churn drivers')
+    return MOCK_CHURN_DRIVERS
+  }
+}
+
+const MOCK_TECH_FAILURES = {
+  slices: [
+    { key: 'paymentFailed',  label: 'Payment Failed',  count: 8200, color: '#ccff00' },
+    { key: 'sessionTimeout', label: 'Session Timeout', count: 4100, color: '#00ccff' },
+    { key: 'apiError',       label: 'API Error',       count: 3300, color: '#ff8800' },
+    { key: 'authFailure',    label: 'Auth Failure',    count: 2400, color: '#ff0055' },
+    { key: 'networkDrop',    label: 'Network Drop',    count: 1500, color: '#8800ff' },
+  ],
+  total: 19500,
+  _mock: true,
+}
+
+export async function fetchTechFailures() {
+  try {
+    const res = await fetchWithTimeout(`${BASE_URL}/analytics/tech-failures`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch {
+    console.warn('[api] Backend unavailable — using mock tech failures')
+    return MOCK_TECH_FAILURES
+  }
+}
+
+const MOCK_ANOMALIES = {
+  anomalies: [
+    { id: 'A-001', severity: 'critical', color: '#ff0055', ts_num: '2',  ts_unit: 'm',
+      message: 'User #0 — gen_failed rate 5.58% (threshold: 3%) · Involuntary churn imminent' },
+    { id: 'A-002', severity: 'critical', color: '#ff0055', ts_num: '7',  ts_unit: 'm',
+      message: 'User #3 — gen_completed 8.49% · Frustration index 0.72 · Critical voluntary churn risk' },
+    { id: 'A-003', severity: 'high',     color: '#ff8800', ts_num: '19', ts_unit: 'm',
+      message: 'User #5 — gen_total dropped to 67 (avg: 198) · Sharp generation decline detected' },
+    { id: 'A-004', severity: 'warning',  color: '#ffcc00', ts_num: '31', ts_unit: 'm',
+      message: 'User #4 — gen_completed 18.83% · At-risk cohort engagement dropping' },
+    { id: 'A-005', severity: 'info',     color: '#00e5ff', ts_num: '1',  ts_unit: 'h',
+      message: 'Model drift on frustration feature — retraining queued (User #1 outlier: 13.49)' },
+  ],
+  _mock: true,
+}
+
+export async function fetchAnomalies() {
+  try {
+    const res = await fetchWithTimeout(`${BASE_URL}/anomalies`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch {
+    console.warn('[api] Backend unavailable — using mock anomalies')
+    return MOCK_ANOMALIES
+  }
+}
+
+/**
+ * Fetch every demo user with a live ML-ensemble prediction attached.
+ * Used by StrategyLab CSV export.
+ */
+export async function fetchUsers() {
+  try {
+    const res = await fetchWithTimeout(`${BASE_URL}/users`)
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    return await res.json()
+  } catch {
+    console.warn('[api] Backend unavailable — using mock users roster')
+    return { users: Object.values(MOCK_USERS).map(u => ({
+      id: u.user_id, risk_score: u.risk_score, churn_score: u.churn_score,
+      risk_level: u.risk_level, churn_type: u.churn_type, metrics: u.metrics,
+      summary: u.summary, model_source: 'mock',
+    })), count: 5, _mock: true }
+  }
+}
+
 // ── checkHealth ───────────────────────────────────────────────────
 /**
  * Ping the backend health endpoint.

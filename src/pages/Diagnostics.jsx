@@ -11,7 +11,7 @@ import {
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { getAccent, accentAlpha } from '../lib/theme'
-import { fetchClusters, fetchShap } from '../services/api'
+import { fetchClusters, fetchShap, fetchModelMetrics, fetchAnomalies } from '../services/api'
 import { clsx } from 'clsx'
 import ShapWaterfall from '../components/ShapWaterfall'
 
@@ -21,15 +21,6 @@ const CLUSTER_COLORS = {
   Technical: '#ffcc00',
   Voluntary: '#ff0055',
 }
-
-// ─── anomaly feed — ML feature-aware signals ──
-const ANOMALIES_RAW = [
-  { id:'A-001', msgKey:'anomaly1', severity:'critical', color:'#ff0055', tsNum:'2',  tsUnit:'m' },
-  { id:'A-002', msgKey:'anomaly2', severity:'critical', color:'#ff0055', tsNum:'7',  tsUnit:'m' },
-  { id:'A-003', msgKey:'anomaly3', severity:'high',     color:'#ff8800', tsNum:'19', tsUnit:'m' },
-  { id:'A-004', msgKey:'anomaly4', severity:'warning',  color:'#ffcc00', tsNum:'31', tsUnit:'m' },
-  { id:'A-005', msgKey:'anomaly5', severity:'info',     color:'#00e5ff', tsNum:'1',  tsUnit:'h' },
-]
 
 // ─── helpers ──────────────────────────────────
 const fadeUp = (delay = 0) => ({
@@ -169,10 +160,19 @@ export default function Diagnostics() {
   const { isDark } = useTheme()
   const accent    = getAccent(isDark)
   const d = t.diagnostics
-  const ANOMALIES = ANOMALIES_RAW.map(a => ({
-    ...a,
-    msg: d[a.msgKey] || a.msgKey,
-    ts: a.tsNum + (a.tsUnit === 'h' ? d.hAgo : d.mAgo),
+  const [rawAnomalies, setRawAnomalies] = useState([])
+  useEffect(() => {
+    fetchAnomalies().then(data => setRawAnomalies(data.anomalies ?? [])).catch(() => {})
+  }, [])
+  // Message strings come directly from the backend (no i18n lookup for
+  // dynamic alert text). Only the relative-time suffix ("m ago" / "h ago")
+  // is translated because it's UI chrome, not data.
+  const ANOMALIES = rawAnomalies.map(a => ({
+    id:       a.id,
+    severity: a.severity,
+    color:    a.color,
+    msg:      a.message ?? '',
+    ts:       (a.ts_num ?? '') + (a.ts_unit === 'h' ? d.hAgo : d.mAgo),
   }))
   const textMuted = isDark ? 'text-white/35' : 'text-black/40'
   const textMain  = isDark ? 'text-white' : 'text-black'
@@ -232,13 +232,27 @@ export default function Diagnostics() {
     setTimeout(() => setRetraining(false), 2800)
   }
 
+  // Model performance metrics from /model/metrics (with fallback display values).
+  const [modelMetrics, setModelMetrics] = useState(null)
+  useEffect(() => {
+    fetchModelMetrics().then(m => { if (m) setModelMetrics(m) }).catch(() => {})
+  }, [])
+  const fmtPct  = (v, digits = 2) => v == null ? '—' : v.toFixed(digits)
+  const fmtPctN = (v)              => v == null ? '—' : Math.round(v * 100) + '%'
+  const fmtK    = (n)              => {
+    if (n == null) return '—'
+    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M'
+    if (n >= 1_000)     return Math.round(n / 1_000) + 'K'
+    return String(n)
+  }
+  const mm = modelMetrics
   const metrics = [
-    { label: d.f1Score,      value: '0.87', sub: d.f1Sub,          color: '#ccff00', icon: TrendingUp, bar: 87 },
-    { label: d.precision,    value: '0.89', sub: d.precisionSub,   color: '#00e5ff', icon: Shield,    bar: 89 },
-    { label: d.recall,       value: '0.85', sub: d.recallSub,      color: '#ff8800', icon: Activity,  bar: 85 },
-    { label: d.confidence,   value: '91%',  sub: d.confidenceSub,  color: '#ccff00', icon: Brain,     bar: 91 },
-    { label: d.aucRoc,       value: '0.94', sub: d.aucRocSub,      color: '#8800ff', icon: Zap,       bar: 94 },
-    { label: d.trainingSize, value: '284K', sub: d.trainingSizeVal, color: '#00e5ff', icon: Database,  bar: null },
+    { label: d.f1Score,      value: fmtPct(mm?.f1_score),                  sub: d.f1Sub,          color: '#ccff00', icon: TrendingUp, bar: mm?.f1_score   != null ? Math.round(mm.f1_score   * 100) : null },
+    { label: d.precision,    value: fmtPct(mm?.precision),                 sub: d.precisionSub,   color: '#00e5ff', icon: Shield,     bar: mm?.precision  != null ? Math.round(mm.precision  * 100) : null },
+    { label: d.recall,       value: fmtPct(mm?.recall),                    sub: d.recallSub,      color: '#ff8800', icon: Activity,   bar: mm?.recall     != null ? Math.round(mm.recall     * 100) : null },
+    { label: d.confidence,   value: fmtPctN(mm?.accuracy),                 sub: d.confidenceSub,  color: '#ccff00', icon: Brain,      bar: mm?.accuracy   != null ? Math.round(mm.accuracy   * 100) : null },
+    { label: d.aucRoc,       value: fmtPct(mm?.auc_roc),                   sub: d.aucRocSub,      color: '#8800ff', icon: Zap,        bar: mm?.auc_roc    != null ? Math.round(mm.auc_roc    * 100) : null },
+    { label: d.trainingSize, value: fmtK((mm?.training_samples ?? 0) + (mm?.test_samples ?? 0)), sub: d.trainingSizeVal, color: '#00e5ff', icon: Database, bar: null },
   ]
 
   return (

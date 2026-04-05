@@ -8,20 +8,44 @@ import {
 } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
+import { fetchUsers } from '../services/api'
 import { clsx } from 'clsx'
 
 // ─── CSV export ───────────────────────────────
-const CSV_ROWS = [
-  ['user_id','risk_score','churn_type','gen_failed','gen_total','frustration','sub_weekday','gen_completed','summary'],
-  ['0','0.85','Involuntary','0.0558','198','0.1962','2','0.8889','Technical churn due to high gen_failed rate.'],
-  ['1','0.15','Healthy','0.0039','198','13.4858','4','0.5389','Loyal power user with high activity.'],
-  ['3','0.92','Voluntary','0.0021','199','0.7229','3','0.0849','Critical churn risk. High frustration index detected.'],
-  ['4','0.45','At Risk','0.0043','199','0.9910','6','0.1883','Medium risk. Engagement dropping.'],
-  ['5','0.78','Voluntary','0.0045','67','-0.4074','5','0.4308','High risk. Sharp decline in total generations.'],
-]
+// Serializes a single CSV cell, quoting + escaping any value that contains
+// commas, quotes, or newlines (RFC 4180-safe enough for our demo export).
+function csvCell(val) {
+  const s = val == null ? '' : String(val)
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
 
-function exportCSV() {
-  const content = CSV_ROWS.map(r => r.join(',')).join('\n')
+async function exportCSV() {
+  const header = ['user_id','risk_score','churn_type','risk_level','gen_failed','gen_total','frustration','sub_weekday','gen_completed','summary','model_source']
+  let dataRows = []
+  try {
+    const data = await fetchUsers()
+    dataRows = (data?.users ?? []).map(u => {
+      const m = u.metrics ?? {}
+      return [
+        u.id,
+        u.risk_score,
+        u.churn_type,
+        u.risk_level,
+        m.gen_failed,
+        m.gen_total,
+        m.frustration,
+        m.sub_weekday,
+        m.gen_completed,
+        u.summary,
+        u.model_source,
+      ]
+    })
+  } catch {
+    // If the backend is unreachable, fall through to an empty export so
+    // the user still gets a file with just the header row.
+  }
+
+  const content = [header, ...dataRows].map(r => r.map(csvCell).join(',')).join('\n')
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')

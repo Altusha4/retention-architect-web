@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
-import { useI18n } from '../context/I18nContext'
 import { clsx } from 'clsx'
 
 const fadeUp = (delay = 0) => ({
@@ -164,7 +163,6 @@ function ChurnColumn({ title, accentColor, causes, timeline, stats, source, icon
 export default function ChurnSplitView() {
   const { t } = useI18n()
   const { isDark } = useTheme()
-  const { t } = useI18n()
   const textMuted = isDark ? 'text-white/40' : 'text-black/50'
   const textMain  = isDark ? 'text-white'    : 'text-black'
 
