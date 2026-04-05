@@ -11,6 +11,7 @@ import {
   TrendingDown, MessageSquare, BookOpen, Zap,
   ChevronDown, Shield,
 } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { clsx } from 'clsx'
@@ -161,6 +162,7 @@ function ChurnColumn({ title, accentColor, causes, timeline, stats, source, icon
 
 // ── Main component ─────────────────────────────
 export default function ChurnSplitView() {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const { t } = useI18n()
   const textMuted = isDark ? 'text-white/40' : 'text-black/50'

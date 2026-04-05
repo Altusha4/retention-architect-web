@@ -9,6 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip as ReTooltip, ReferenceLine, Cell, ResponsiveContainer,
 } from 'recharts'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
@@ -108,6 +109,7 @@ export default function ShapWaterfall({
   outputValue = null,
   userId      = null,
 }) {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const { t } = useI18n()
   const accent    = getAccent(isDark)

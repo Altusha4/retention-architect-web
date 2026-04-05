@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, Cell, LabelList,
 } from 'recharts'
 import { AlertTriangle, Activity, CheckCircle2, Users, Clock, DollarSign } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { clsx } from 'clsx'
@@ -83,7 +84,7 @@ function ClusterCard({ cluster, delay, isDark, t }) {
           <span className={clsx('text-[0.55rem] font-semibold', textMuted)}>{t.segments.dominantChurn}</span>
           <span className="text-[0.55rem] font-bold px-2 py-0.5 rounded-full"
             style={{ background: `${cluster.color}14`, color: cluster.color }}>
-            {cluster.dominantType}
+            {t.riskSeg[cluster.dominantType.toLowerCase()] ?? cluster.dominantType}
           </span>
         </div>
       </div>
@@ -115,6 +116,7 @@ function DistTooltip({ active, payload }) {
 
 // ── Main component ─────────────────────────────
 export default function RiskSegmentation({ clusters = null }) {
+  const { t } = useI18n()
   const { isDark } = useTheme()
   const { t } = useI18n()
   const data = clusters ?? MOCK_CLUSTERS

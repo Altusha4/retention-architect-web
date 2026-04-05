@@ -11,6 +11,7 @@ import {
   Tooltip as ReTooltip, ReferenceLine, ResponsiveContainer,
 } from 'recharts'
 import { Zap } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { getAccent } from '../lib/theme.js'
@@ -123,7 +124,7 @@ export default function ThresholdOptimizer() {
                 tick={{ fill: tickFill, fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                label={{ value: 'Threshold', position: 'insideBottom', offset: -12, fill: tickFill, fontSize: 11 }}
+                label={{ value: t.threshold.thresholdLabel, position: 'insideBottom', offset: -12, fill: tickFill, fontSize: 11 }}
               />
 
               <YAxis

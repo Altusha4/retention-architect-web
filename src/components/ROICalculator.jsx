@@ -11,6 +11,7 @@ import {
   ResponsiveContainer, Cell, CartesianGrid,
 } from 'recharts'
 import { DollarSign, TrendingUp, AlertTriangle, Zap } from 'lucide-react'
+import { useI18n } from '../context/I18nContext'
 import { useTheme } from '../context/ThemeContext'
 import { useI18n } from '../context/I18nContext'
 import { getAccent, accentAlpha } from '../lib/theme.js'
